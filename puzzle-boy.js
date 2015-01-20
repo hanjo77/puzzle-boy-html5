@@ -1,6 +1,12 @@
-var canvas, context, sprites;
+var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop;
 
 var currentPlayer = 0;
+
+var levelNr = 0;
+
+var animSpeed = 10;
+
+var gameSpeed = 1000/60;
 
 var fieldSize = [0, 0];
 
@@ -53,22 +59,9 @@ var tileSize = 32;
 
 var spriteMap = {};
 
-var levelMap = [];
-
 var rotation = 0;
 
-var players = [];
 var playerIndexes = ["0", "*"];
-
-var player = {
-
-	"pos": [0, 0],
-	"goal": [0, 0],
-};
-
-var blocks = {};
-
-var levelArray = [];
 
 var playerSpeed = 2;
 
@@ -144,7 +137,7 @@ var sprites = {
 				"url": "puzzle-boy-right-1.png",
 			},
 			{
-				"url": "puzzle-boy-right-1.png",
+				"url": "puzzle-boy-right-2.png",
 			}
 		],
 		"down": [
@@ -153,7 +146,7 @@ var sprites = {
 				"url": "puzzle-boy-down-1.png",
 			},
 			{
-				"url": "puzzle-boy-down-1.png",
+				"url": "puzzle-boy-down-2.png",
 			}
 		],
 		"left": [
@@ -161,7 +154,7 @@ var sprites = {
 				"url": "puzzle-boy-left-1.png",
 			},
 			{
-				"url": "puzzle-boy-left-1.png",
+				"url": "puzzle-boy-left-2.png",
 			}
 		]
 	},
@@ -169,35 +162,35 @@ var sprites = {
 		
 		"up": [
 			{
-				"url": "puzzle-boy-up-1.png",
+				"url": "puzzle-girl-up-1.png",
 			},
 			{
-				"url": "puzzle-boy-up-2.png",
+				"url": "puzzle-girl-up-2.png",
 			}
 		],
 		"right": [
 			{
-				"url": "puzzle-boy-right-1.png",
+				"url": "puzzle-girl-right-1.png",
 			},
 			{
-				"url": "puzzle-boy-right-1.png",
+				"url": "puzzle-girl-right-2.png",
 			}
 		],
 		"down": [
 			{
 				"index": "*",
-				"url": "puzzle-boy-down-1.png",
+				"url": "puzzle-girl-down-1.png",
 			},
 			{
-				"url": "puzzle-boy-down-1.png",
+				"url": "puzzle-girl-down-2.png",
 			}
 		],
 		"left": [
 			{
-				"url": "puzzle-boy-left-1.png",
+				"url": "puzzle-girl-left-1.png",
 			},
 			{
-				"url": "puzzle-boy-left-1.png",
+				"url": "puzzle-girl-left-2.png",
 			}
 		]
 	},
@@ -350,9 +343,15 @@ var sprites = {
 	},
 };
 
-getImages(sprites);
-
 function loadLevel(level) {
+	
+	getImages(sprites);
+
+	players = [];
+	player = null;
+	levelMap = [];
+	blocks = {};
+	levelArray = [];
 	
 	var levelRows = level.split("\n");
 	var row, col;
@@ -394,10 +393,12 @@ function loadLevel(level) {
 						"goal": [col, row],
 						"offsetX": 0,
 						"offsetY": 0,
-						"direction": null
+						"direction": null,
+						"animFrame": 0
 					};
 					players.push(tmpPlayer);
 					player = players[0];
+					console.log(player);
 				}
 				else if (spriteMap[char].spriteClass == "rotation") {
 			
@@ -443,12 +444,21 @@ function loadLevel(level) {
 		levelArray.push(rawLevelRow);
 	}
 	
+	$("body").html('<canvas id="playground"></canvas>');
+	canvas = $("#playground").get(0);
+	canvas.width = fieldSize[0];
+	canvas.height = fieldSize[1];
+	context = canvas.getContext("2d");
+	
 	updateCollisionMaps();
+	
+	gameLoop = window.setInterval(drawPlayground, gameSpeed);
 }
 
 function switchPlayers() {
 
 	currentPlayer = (currentPlayer+1)%players.length;
+	console.log(player);
 	player = players[currentPlayer];
 }
 
@@ -505,12 +515,7 @@ function getImages(obj, className, catName) {
 
 $(document).ready(function() {
 
-	loadLevel(levels[5]);
-	canvas = $("#playground").get(0);
-	canvas.width = fieldSize[0];
-	canvas.height = fieldSize[1];
-	context = canvas.getContext("2d");
-	window.setInterval(drawPlayground, 10);
+	loadLevel(levels[levelNr]);
 });
 
 function updateBlocks() {
@@ -705,7 +710,7 @@ function drawPlayground() {
 	}
 	if (player.sprite) {
 		
-		context.drawImage(player.sprite.drawing, (player.pos[0]*tileSize)+player.offsetX, (player.pos[1]*tileSize)+player.offsetY);			
+		context.drawImage(player.sprite.altSprites[Math.round(player.animFrame/animSpeed)].drawing, (player.pos[0]*tileSize)+player.offsetX, (player.pos[1]*tileSize)+player.offsetY);			
 	}
 	if (players.length > 1) {
 	
@@ -826,8 +831,9 @@ function animate() {
 		}
 	}
 	
-	if (player.direction) {
+	if (player && player.direction) {
 	
+		player.animFrame = (player.animFrame+1)%animSpeed;
 		var oldPos = [player.pos[0], player.pos[1]];
 		switch (player.direction.key) {
 		
@@ -1019,6 +1025,9 @@ function checkPlayerCanMove(direction) {
 		else if (goalField.sprite.index == "2") {
 		
 			player.goal = tmpGoal;
+			levelNr++;
+			clearInterval(gameLoop);
+			loadLevel(levels[levelNr]);
 			console.log("LEVEL SOLVED");
 		}
 		else if (goalField.sprite.spriteClass == "block") {
@@ -1235,7 +1244,7 @@ function blockCanRotate(field, direction, sprite) {
 
 $(document).keyup(function(e) {
 
-	if (!player.direction) {
+	if (player && !player.direction) {
 		
 		switch(e.keyCode) {
 		
@@ -1260,12 +1269,15 @@ $(document).keyup(function(e) {
 			break;
 		}
 		checkPlayerCanMove(player.direction);
-		player.sprite.index = " ";
-		if (player.direction) {
+		if (player) {
+			
+			player.sprite.index = " ";
+			if (player.direction) {
 		
-			var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
-			sprite.index = playerIndexes[currentPlayer];
-			player.sprite = sprite;
+				var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
+				sprite.index = playerIndexes[currentPlayer];
+				player.sprite = sprite;
+			}
 		}
 	}
 });

@@ -7,6 +7,5 @@
 		<script src="puzzle-boy.js"></script>
 	</head>
 	<body>
-		<canvas id="playground"></canvas>
 	</body>
 </html>
