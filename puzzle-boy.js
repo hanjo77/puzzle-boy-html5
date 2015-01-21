@@ -116,9 +116,9 @@ var levels = ["111111111111111111\n"
 			+ "1             1\n"
 			+ "1     i d     1\n"
 			+ "11111     11111\n"
-			+ "111111111111111",]
+			+ "111111111111111",];
 
-var levelNr = 6;
+var levelNr = 0;
 
 
 /*
@@ -409,11 +409,6 @@ function loadLevel(level) {
 					};
 					players.push(tmpPlayer);
 					player = players[0];
-					console.log(player);
-				}
-				else if (spriteMap[char].spriteClass == "rotation") {
-			
-					spriteMap[char].topLeft = [col-1, row-1];
 				}
 			}
 			else {
@@ -470,6 +465,7 @@ function switchPlayers() {
 
 	currentPlayer = (currentPlayer+1)%players.length;
 	console.log(player);
+	console.log(levelMap);
 	player = players[currentPlayer];
 }
 
@@ -597,10 +593,10 @@ function updateCollisionMaps() {
 			
 				var tmpPlayer = players[i];
 			}
-			var sprite = levelRow[col].sprite;
-			if (sprite && sprite.spriteClass == "rotation") {
+			var sprite = levelRow[col];
+			if (sprite && sprite.sprite.spriteClass == "rotation") {
 		
-				var collisionMap = sprite.collisionMap.split("\n");
+				var collisionMap = sprite.sprite.collisionMap.split("\n");
 				for (var innerRow = 0; innerRow < collisionMap.length; innerRow++) {
 				
 					var collisionRow = collisionMap[innerRow];
@@ -608,14 +604,13 @@ function updateCollisionMaps() {
 					
 						var collision = collisionRow.charAt(innerCol);
 						var neighbourBlock = levelMap[row+(innerRow-1)][col+(innerCol-1)];
-						if (!neighbourBlock.collisions) {
+						if (neighbourBlock && neighbourBlock.collisions) {
 							
-							neighbourBlock.collisions = [];
+							neighbourBlock.collisions.push({
+								"key": collision,
+								"collider": sprite
+							});
 						}
-						neighbourBlock.collisions.push({
-							"key": collision,
-							"collider": sprite
-						});
 					}
 				}
 			}
@@ -627,11 +622,13 @@ function drawPlayground() {
 	
 	animate();
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
+	// draw background
 	for (var row = 0; row < levelMap.length; row++) {
 		
 		var levelRow = levelMap[row];
 		for (var col = 0; col < levelRow.length; col++) {
 			
+			levelRow[col].collisions = [];
 			var sprite = levelRow[col].sprite;
 			if (sprite && sprite.drawing && sprite.index != " ") {
 
@@ -639,18 +636,22 @@ function drawPlayground() {
 					(tileSize / 2)+(col*tileSize), 
 					(tileSize / 2)+(row*tileSize)
 				];
+				// first player
 				if (sprite.index == "0") {
 					
 					players[0].sprite = sprite;
 				}
+				// second player
 				else if (sprite.index == "*") {
 					
 					players[1].sprite = sprite;
 				}
+				// draw moveable blocks
 				else if (sprite && sprite.spriteClass == "block") {
 				
 					for (var elem in blocks) {
 					
+						// Draw a hole tile if it's under the block
 						if (levelArray[row][col] != " ") {
 						
 							var bgSprite = spriteMap[levelArray[row][col]];
@@ -713,6 +714,7 @@ function drawPlayground() {
 							16);
 					}
 				}
+				// all others
 				else {
 					
 					context.save();
@@ -727,6 +729,7 @@ function drawPlayground() {
 			}
 		}
 	}
+	// draw players
 	if (player.sprite) {
 		
 		context.drawImage(player.sprite.altSprites[Math.round(player.animFrame/animSpeed)].drawing, 				(player.pos[0]*tileSize)+player.offsetX, 
@@ -749,8 +752,13 @@ function animate() {
 		
 			var sprite = levelRow[col].sprite;
 			var rotation = levelRow[col].rotation;
+			// console.log(rotation);
 			if (rotation && (rotation.current != rotation.goal)) {
 		
+				// get current rotation index
+				var index = rotationIndexByKey(sprite.key);
+				var nextIndex = index;
+				// rotation clockwise
 				if (rotation.direction > 0) {
 
 					if (rotation.current < rotation.goal) {
@@ -759,18 +767,11 @@ function animate() {
 					}
 					else {
 					
-						var index = rotationIndexByKey(sprite.key);
-						index = (index+1)%rotations.length;
-						sprite = sprite.altSprites[rotations[index].key];
-						levelRow[col].rotation = {
-							"current": 0,
-							"goal": 0,
-							"direction": 0
-						};
-						sprite.topLeft = [col-1, row-1];
-						levelRow[col].sprite = sprite;
+						// increase rotation index
+						nextIndex = (index+1)%rotations.length;
 					}
 				}
+				// rotation counter-clockwise
 				else if (rotation.direction < 0) {
 
 					if (rotation.current > rotation.goal) {
@@ -779,25 +780,29 @@ function animate() {
 					}
 					else {
 					
-						var index = rotationIndexByKey(sprite.key);
-						index--;
-						if (index < 0) {
+						// decrease rotation index
+						nextIndex--;
+						if (nextIndex < 0) {
 						
-							index = 3;
+							nextIndex = 3;
 						}
-						sprite = sprite.altSprites[rotations[index].key];
-						levelRow[col].rotation = {
-							"current": 0,
-							"goal": 0,
-							"direction": 0
-						};
-						sprite.topLeft = [col-1, row-1];
-						levelRow[col].sprite = sprite;
 					}
+				}
+				// reset stuff if index was changed
+				if (nextIndex += index) {
+					
+					sprite = sprite.altSprites[rotations[index].key];
+					levelRow[col].rotation = {
+						"current": 0,
+						"goal": 0,
+						"direction": 0
+					};
+					levelRow[col].sprite = sprite;
 				}
 			}
 		}
 	}
+	// move blocks
 	for (var elem in blocks) {
 		
 		var block = blocks[elem];
@@ -851,6 +856,7 @@ function animate() {
 		}
 	}
 	
+	// move player
 	if (player && player.direction) {
 	
 		player.animFrame = (player.animFrame+1)%animSpeed;
@@ -859,40 +865,42 @@ function animate() {
 		
 			case "up":
 				player.offsetY -= playerSpeed;
+				if (player.offsetY < (-1*tileSize)) {
+		
+					player.offsetY += tileSize;
+					player.pos[1]--;
+				}
 				break;
 				
 			case "right":
 				player.offsetX += playerSpeed;
+				if (player.offsetX > tileSize) {
+		
+					player.offsetX -= tileSize;
+					player.pos[0]++;
+				}
 				break;
 				
 			case "down":
 				player.offsetY += playerSpeed;
+				if (player.offsetY > tileSize) {
+		
+					player.offsetY -= tileSize;
+					player.pos[1]++;
+				}
 				break;
 				
 			case "left":
 				player.offsetX -= playerSpeed;
+				if (player.offsetX < (-1*tileSize)) {
+		
+					player.offsetX += tileSize;
+					player.pos[0]--;
+				}
 				break;
 		}
-		if (player.offsetX > tileSize) {
 		
-			player.offsetX -= tileSize;
-			player.pos[0]++;
-		}
-		if (player.offsetX < (-1*tileSize)) {
-		
-			player.offsetX += tileSize;
-			player.pos[0]--;
-		}
-		if (player.offsetY > tileSize) {
-		
-			player.offsetY -= tileSize;
-			player.pos[1]++;
-		}
-		if (player.offsetY < (-1*tileSize)) {
-		
-			player.offsetY += tileSize;
-			player.pos[1]--;
-		}
+		// goal reached
 		if ((player.pos[0] == player.goal[0]) && (player.pos[1] == player.goal[1])) {
 		
 			levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
@@ -907,9 +915,13 @@ function animate() {
 
 function checkPlayerCanMove(direction) {
 
+	var tmpGoal = [player.goal[0], player.goal[1]];
+	var canPass = false;
 	if (direction) {
 	
-		var tmpGoal = [player.goal[0], player.goal[1]];
+		// define temporary goal position
+
+		// find sprite 2 ahead in the same direction
 		var afterNext = [player.goal[0], player.goal[1]];
 		switch (direction.key) {
 		
@@ -936,106 +948,122 @@ function checkPlayerCanMove(direction) {
 		var afterNextField = null;
 		if (afterNext && levelMap[afterNext[1]] && levelMap[afterNext[1]][afterNext[0]]) {
 			
-			levelMap[afterNext[1]][afterNext[0]];
+			afterNextField = levelMap[afterNext[1]][afterNext[0]];
 		}
 		var goalField = levelMap[tmpGoal[1]][tmpGoal[0]];
-		var centerField = null;
-		if (goalField.collisions) {
-		
-			centerField = goalField.collisions[0].collider;
-		}
 
+		if (goalField.collisions && goalField.collisions.length > 0) {
+			
+			var rotDirection = 0;
+			for (var collisionCount = 0; collisionCount < goalField.collisions.length; collisionCount++) {
+	
+				var collision = goalField.collisions[collisionCount];
+				var centerField = collision.collider;
+				console.log(centerField);
+				if (centerField) {
+					
+					if (collision.key == "+") {
+				
+						switch (direction.key) {
+					
+							case "up":
+								rotDirection--
+								break;
+					
+							case "right":
+								rotDirection++
+								break;
+					
+							case "down":
+								rotDirection++
+								break;
+					
+							case "left":
+								rotDirection--
+								break;
+						}
+					}
+					else if (collision.key == "-") {
+				
+						switch (direction.key) {
+					
+							case "up":
+								rotDirection++
+								break;
+					
+							case "right":
+								rotDirection--
+								break;
+					
+							case "down":
+								rotDirection--
+								break;
+					
+							case "left":
+								rotDirection++
+								break;
+						}
+					}
+				}
+			}
+			if (!centerField.rotation) {
+
+				centerField.rotation = {
+					"goal": 0,
+					"current": 0,
+					"direction": rotDirection
+				};
+			}
+			if (rotDirection != 0) {
+				
+				var index = rotationIndexByKey(centerField.sprite.key);
+				centerField.rotation.direction = rotDirection;
+
+				if (rotDirection > 0) {
+
+					centerField.rotation.goal += Math.PI/2;
+					index = (index+1)%rotations.length;
+				}
+				else if (rotDirection < 0) {
+
+					centerField.rotation.goal -= Math.PI/2;
+					index--;
+					if (index < 0) {
+	
+						index = rotations.length-1;
+					}
+				}
+			}
+			if (canPass) {
+				
+				rotateBlock(centerField, rotDirection);
+			}
+		}
+		
 		if (
 			(goalField.sprite.index == " ") &&
-			(levelArray[tmpGoal[1]][tmpGoal[0]] == " ") &&
-			(
-				!goalField.collisions || 
-				goalField.collisions[0].key == " " || 
-				goalField.collisions[0].key == "=" || 
-				goalField.collisions[0].key == "r" || 
-				goalField.collisions[0].key == "l"
-			)
-			){
-		
-			player.goal = tmpGoal;
-		}
-		else if (centerField && (goalField.collisions[0].key == "+")) {
-		
-			if (!afterNextField || afterNextField.collisions[0].key != "0") {
-			
-				player.goal = tmpGoal;
-				switch(direction.key) {
+			(levelArray[tmpGoal[1]][tmpGoal[0]] == " ")
+			) {
+
+			if (!goalField.collisions || goalField.collisions.length <= 0) {
 				
-					case "up":
-						if (levelMap[tmpGoal[1]-1][tmpGoal[0]].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, -1);
-						}
-						break;
+				canPass = true;
+			}
+			else {
 				
-					case "right":
-						if (levelMap[tmpGoal[1]][tmpGoal[0]+1].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, 1);
-						}
-						break;
+				for (var collisionCount = 0; collisionCount < goalField.collisions.length; collisionCount++) {
 				
-					case "down":
-						if (levelMap[tmpGoal[1]+1][tmpGoal[0]].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, 1);
-						}
-						break;
-				
-					case "left":
-						if (levelMap[tmpGoal[1]][tmpGoal[0]-1].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, -1);
-						}
-						break;
-				}
+					if (goalField.collisions[collisionCount].key != "+" &&
+						goalField.collisions[collisionCount].key != "-") {
+							
+						canPass = true;
+					}
+				}	
 			}
 		}
-		else if (centerField && (goalField.collisions[0].key == "-")) {
+		else if (goalField.sprite.spriteClass == "goal") {
 		
-			if (!afterNextField) {
-			
-				player.goal = tmpGoal;
-				switch(direction.key) {
-				
-					case "up":
-						if (levelMap[tmpGoal[1]-1][tmpGoal[0]].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, 1);
-						}
-						break;
-				
-					case "right":
-						if (levelMap[tmpGoal[1]][tmpGoal[0]+1].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, -1);
-						}
-						break;
-				
-					case "down":
-						if (levelMap[tmpGoal[1]+1][tmpGoal[0]].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, -1);
-						}
-						break;
-				
-					case "left":
-						if (levelMap[tmpGoal[1]][tmpGoal[0]-1].collisions[0].key != "0") {
-						
-							rotateBlock(centerField, 1);
-						}
-						break;
-				}
-			}
-		}
-		else if (goalField.sprite.index == "2") {
-		
-			player.goal = tmpGoal;
+			canPass = true;
 			levelNr++;
 			clearInterval(gameLoop);
 			loadLevel(levels[levelNr]);
@@ -1046,170 +1074,100 @@ function checkPlayerCanMove(direction) {
 			if (levelArray[tmpGoal[1]][tmpGoal[0]] != "3") {
 			
 				var block = blocks[goalField.key];
+				canPass = true;
+				var neighbour;
 				switch (direction.key) {
 			
 					case "up":
-						var canPass = true;
-						for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
-							
-							if (
-								(levelMap[block.pos[1]-1][col].sprite.index != " " &&
-								levelMap[block.pos[1]-1][col].sprite.index != "3") ||
-								levelMap[block.pos[1]-1][col].collisions[0].key == "+" ||
-								levelMap[block.pos[1]-1][col].collisions[0].key == "-"
-								) {
-								
-								canPass = false;
-							}
-						}
-						if (canPass) {
-							
-							player.goal = tmpGoal;
-							block.goal = [block.pos[0], block.pos[1]-1];
-							block.direction = direction;
-						}
+						
+						neighbour = levelMap[block.pos[1]-1][block.pos[0]];
 						break;
 					
 					case "right":
-						var canPass = true;
-						for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
-							
-							if (
-								(levelMap[row][block.pos[0]+block.size[0]].sprite.index != " " &&
-								levelMap[row][block.pos[0]+block.size[0]].sprite.index != "3") ||
-								levelMap[row][block.pos[0]+block.size[0]].collisions[0].key == "+" ||
-								levelMap[row][block.pos[0]+block.size[0]].collisions[0].key == "-"
-								) {
-								
-								canPass = false;
-							}
-						}
-						if (canPass) {
-							
-							player.goal = tmpGoal;
-							block.goal = [block.pos[0]+1, block.pos[1]];
-							block.direction = direction;
-						}
+						
+						neighbour = levelMap[block.pos[1]][block.pos[0]+block.size[0]];
 						break;
 					
 					case "down":
-						var canPass = true;
-						for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
-							
-							if ((levelMap[block.pos[1]+block.size[1]][col].sprite.index != " " &&
-								levelMap[block.pos[1]+block.size[1]][col].sprite.index != "3") ||
-								levelMap[block.pos[1]+block.size[1]][col].collisions[0].key == "+" ||
-								levelMap[block.pos[1]+block.size[1]][col].collisions[0].key == "-"
-								) {
-								
-								canPass = false;
-							}
-						}
-						if (canPass) {
-							
-							player.goal = tmpGoal;
-							block.goal = [block.pos[0], block.pos[1]+1];
-							block.direction = direction;
-						}
+						
+						neighbour = levelMap[block.pos[1]+block.size[1]][block.pos[0]];
 						break;
 					
 					case "left":
-						var canPass = true;
-						for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
-							
-							if ((levelMap[row][block.pos[0]-1].sprite.index != " " &&
-								levelMap[row][block.pos[0]-1].sprite.index != "3") ||
-								levelMap[row][block.pos[0]-1].collisions[0].key == "+" ||
-								levelMap[row][block.pos[0]-1].collisions[0].key == "-"
-								) {
-								
-								canPass = false;
-							}
-						}
-						if (canPass) {
-							
-							player.goal = tmpGoal;
-							block.goal = [block.pos[0]-1, block.pos[1]];
-							block.direction = direction;
-						}
+
+						neighbour = levelMap[block.pos[1]][block.pos[0]-1];
 						break;
 				}
+				for (var collisionCount = 0; collisionCount < neighbour.collisions.length; collisionCount++) {
+					
+					if (
+						(neighbour.sprite.index != " " && neighbour.sprite.index != "3") ||
+						neighbour.collisions[collisionCount].key == "+" ||
+						neighbour.collisions[collisionCount].key == "-"
+						) {
+					
+						canPass = false;
+					}
+				}
+				if (canPass) {
+					
+					block.goal = afterNext;
+					block.direction = direction;
+				}
+				
 			}
 		}
+	}
+	if (canPass) {
+		
+		player.goal = tmpGoal;
+	}
+	else {
+		
+		player.goal = player.pos;
 	}
 }
 
 function rotateBlock(field, direction) {
 
-	if (!field.rotation) {
-	
-		field.rotation = {
-			"goal": 0,
-			"current": 0,
-			"direction": direction
-		};
-	}
-	var index = 0;
-	field.rotation.direction = direction;
-	
-	if (direction > 0) {
-	
-		field.rotation.goal += Math.PI/2;
-		index = rotationIndexByKey(field.sprite.key);
-		index = (index+1)%rotations.length;
-	}
-	else if (direction < 0) {
-	
-		field.rotation.goal -= Math.PI/2;
-		index = rotationIndexByKey(field.sprite.key);
-		index--;
-		if (index < 0) {
+	var sprite = field.sprite;
+	if (sprite) {
 		
-			index = 3;
-		}
-	}
-
-	sprite = field.sprite.altSprites[rotations[index].key];
-	if (blockCanRotate(field, direction, sprite)) {
-	
-		if (sprite) {
+		var startRow = field.row-1;
+		var startCol = field.col-1;
+		var collisionMap = sprite.collisionMap.split("\n");
+		for (var tmpRow = 0; tmpRow < collisionMap.length; tmpRow++) {
+		
+			for (var tmpCol = 0; tmpCol < collisionMap[tmpRow].length; tmpCol++) {
 			
-			var startRow = field.row-1;
-			var startCol = field.col-1;
-			var collisionMap = sprite.collisionMap.split("\n");
-			for (var tmpRow = 0; tmpRow < collisionMap.length; tmpRow++) {
-			
-				for (var tmpCol = 0; tmpCol < collisionMap[tmpRow].length; tmpCol++) {
-				
+				if (
+					(player.goal[1] == startRow+tmpRow) &&
+					(player.goal[0] == startCol+tmpCol)
+					) {
+					
+					var tmpChar = collisionMap[tmpRow].charAt(tmpCol);
 					if (
-						(player.goal[1] == startRow+tmpRow) &&
-						(player.goal[0] == startCol+tmpCol)
+						(tmpChar == "+") ||
+						(tmpChar == "-")
 						) {
 						
-						var tmpChar = collisionMap[tmpRow].charAt(tmpCol);
-						if (
-							(tmpChar == "+") ||
-							(tmpChar == "-")
-							) {
-							
-							switch (player.direction.key) {
-							
-								case "up":
-									player.goal[1]--;
-									break;
-							
-								case "right":
-									player.goal[0]++;
-									break;
-							
-								case "down":
-									player.goal[1]++;
-									break;
-							
-								case "left":
-									player.goal[0]--;
-									break;
-							}
+						switch (player.direction.key) {
+						
+							case "up":
+								player.goal[1]--;
+								break;
+						
+							case "right":
+								player.goal[0]++;
+								break;
+						
+							case "down":
+								player.goal[1]++;
+								break;
+						
+							case "left":
+								player.goal[0]--;
+								break;
 						}
 					}
 				}
@@ -1218,40 +1176,6 @@ function rotateBlock(field, direction) {
 	}
 }
 
-function blockCanRotate(field, direction, sprite) {
-
-	var canGo = true;
-	var thisCollisionMap = field.sprite.collisionMap.split("\n");
-	var collisionMap = sprite.collisionMap.split("\n");
-	for (var row = 0; row < collisionMap.length; row++) {
-	
-		var thisCollisionRow = thisCollisionMap[row];
-		var collisionRow = collisionMap[row];
-		for (var col = 0; col < collisionRow.length; col++) {
-		
-			var thisCollisionChar = thisCollisionRow.charAt(col);
-			var collisionChar = collisionRow.charAt(col);
-			var char = levelMap[field.sprite.topLeft[1]+row][field.sprite.topLeft[0]+col].sprite.index;
-			if (
-				(direction > 0 && thisCollisionChar == "r" && char && char != " ") ||
-				(direction < 0 && thisCollisionChar == "l" && char && char != " ") ||
-				(
-					(collisionChar == "-" || collisionChar == "+") &&
-					(char && char != " ")
-				)
-			   ) {
-			
-				canGo = false;
-			}
-		}
-	}
-	if (!canGo) {
-	
-		field.rotation.goal = field.rotation.current;
-		player.goal = player.pos;
-	}
-	return canGo;
-}
 
 $(document).keyup(function(e) {
 
