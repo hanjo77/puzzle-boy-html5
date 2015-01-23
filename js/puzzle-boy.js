@@ -1,4 +1,4 @@
-var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps;
+var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, lastClick;
 
 var currentPlayer = 0;
 
@@ -1301,6 +1301,36 @@ function checkPlayerCanMove(direction) {
 	}
 }
 
+$(document).swipe( {
+	
+	swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+		
+		if (player && !player.direction) {
+			player.direction = rotations[rotationIndexByKey(direction)];
+			handlePlayerMovement();
+		}
+	},
+   threshold:0
+});
+
+$(document).click(function(e) {
+	
+	var timePassed = 10000;
+	if (!lastClick) {
+		
+		lastClick = new Date();
+	}
+	else {
+		
+		timePassed = new Date() - lastClick;
+		lastClick = null;
+	}
+	if (timePassed < 500 && (player && !player.direction)) {
+		
+		switchPlayers()
+	}
+});
+
 $(document).keyup(function(e) {
 
 	if (player && !player.direction) {
@@ -1327,15 +1357,20 @@ $(document).keyup(function(e) {
 			switchPlayers();
 			break;
 		}
-		checkPlayerCanMove(player.direction);
-		if (player && player.sprite) {
-			
-			if (player.direction) {
-		
-				var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
-				sprite.index = playerIndexes[currentPlayer];
-				player.sprite = sprite;
-			}
-		}
+		handlePlayerMovement();
 	}
 });
+
+function handlePlayerMovement() {
+	
+	checkPlayerCanMove(player.direction);
+	if (player && player.sprite) {
+		
+		if (player.direction) {
+	
+			var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
+			sprite.index = playerIndexes[currentPlayer];
+			player.sprite = sprite;
+		}
+	}
+}

@@ -5,7 +5,7 @@ html, body {
 
 body {
 	
-	background-image: url(sprites/brick.png);
+	background-image: url(../sprites/brick.png);
 	background-position: static;
 	margin: 0;
 	padding: 0;
