@@ -120,7 +120,72 @@ var levels = ["111111111111111111\n"
 			+ "1             1\n"
 			+ "1     i d     1\n"
 			+ "11111     11111\n"
-			+ "111111111111111",];
+			+ "111111111111111",
+									
+			  "11111111111111111\n"
+			+ "1111    D    1111\n"
+			+ "1111    D    1111\n"
+			+ "1111A BCDFG H1111\n"
+			+ "1   A BCDFG H   1\n"
+			+ "1 2 A B E G H 0 1\n"
+			+ "1   A B E G H   1\n"
+			+ "1111  B   G  1111\n"
+			+ "11111111111111111",
+									
+			  "1111111111111111111\n"
+			+ "1      1 A 1      1\n"
+			+ "1      1   1      1\n"
+			+ "1        h C      1\n"
+			+ "1   2  i   D   0  1\n"
+			+ "1        g E      1\n"
+			+ "1      1   1      1\n"
+			+ "1      1 B 1      1\n"
+			+ "1111111111111111111",
+									
+			  "1111111111111111\n"
+			+ "1              1\n"
+			+ "1     h e    0 1\n"
+			+ "1      g       1\n"
+			+ "1        e     1\n"
+			+ "1 2   g f    * 1\n"
+			+ "1              1\n"
+			+ "1111111111111111",
+
+			  "11111111111\n"
+			+ "1111   1111\n"
+			+ "111     111\n"
+			+ "111 f   111\n"
+			+ "11   0   11\n"
+			+ "11    h  11\n"
+			+ "1  g   f  1\n"
+			+ "1    1    1\n"
+			+ "1 m     m 1\n"
+			+ "1   AAA   1\n"
+			+ "11111 11111\n"
+			+ "111     111\n"
+			+ "1111 2 1111\n"
+			+ "1111   1111\n"
+			+ "11111111111",
+
+			  "11111111111111111\n"
+			+ "1 0  1     A    1\n"
+			+ "1    1    11111 1\n"
+			+ "1111 1 Bl   111 1\n"
+			+ "1    1        1 1\n"
+			+ "1 CCC111113  11 1\n"
+			+ "1             1 1\n"
+			+ "1 DE   1 1 FFF1 1\n"
+			+ "1 DE     1      1\n"
+			+ "1 D3 133   13 1 1\n"
+			+ "1    1333  13 1 1\n"
+			+ "1111113333  G 1 1\n"
+			+ "1    133 3  G 1 1\n"
+			+ "1    1333 1 G 1 1\n"
+			+ "1    133331 G 1 1\n"
+			+ "1 2  133331 G 1 1\n"
+			+ "1      3331     1\n"
+			+ "11111111111111111",
+];
 
 var levelNr = 0;
 
@@ -586,6 +651,7 @@ function getImages(obj, className, catName) {
 $(document).ready(function() {
 
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
+	console.log(levelNr);
 	if (!isNaN(levelNr)) {
 		
 		if (levelNr >= levels.length) {
@@ -1381,7 +1447,7 @@ document.addEventListener('touchend', function(e) {
 	}
 }, false);
 
-$(document).keyup(function(e) {
+$(document).keydown(function(e) {
 
 	if (player && !player.direction) {
 		
