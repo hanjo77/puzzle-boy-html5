@@ -1,8 +1,10 @@
-var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, lastClick;
+var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, dragStartPos;
 
 var currentPlayer = 0;
 
 var animSpeed = 10;
+
+var swipeTolerance = 50;
 
 var rotationSpeed = 0.1;
 
@@ -1301,33 +1303,57 @@ function checkPlayerCanMove(direction) {
 	}
 }
 
-$(document).swipe( {
-	
-	swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
-		
-		if (player && !player.direction) {
-			player.direction = rotations[rotationIndexByKey(direction)];
-			handlePlayerMovement();
-		}
-	},
-   threshold:0
-});
-
 document.addEventListener('touchstart', function(e) {
 		
-	var timePassed = 10000;
-	if (!lastClick) {
+	if (e.touches.length > 1) {
 		
-		lastClick = new Date();
+		switchPlayers()
 	}
 	else {
 		
-		timePassed = new Date() - lastClick;
-		lastClick = null;
+		var touch = e.touches[0];
+		dragStartPos = [touch.pageX, touch.pageY]
 	}
-	if (timePassed < 500 && (player && !player.direction)) {
+}, false);
+
+document.addEventListener('touchend', function(e) {
+		
+	if (e.touches.length > 1) {
 		
 		switchPlayers()
+	}
+	else if (dragStartPos) {
+		
+		var touch = e.changedTouches[0];
+		var distance = [touch.pageX-dragStartPos[0], touch.pageY-dragStartPos[1]];
+		var direction = "";
+		if (Math.abs(distance[0]) > Math.abs(distance[1])) { // horizontal movement
+			
+			if (distance[0] < -1*swipeTolerance) {
+				
+				direction = "left";
+			}
+			else if (distance[0] > swipeTolerance) {
+				
+				direction = "right";
+			}
+		}
+		else {
+			
+			if (distance[1] < -1*swipeTolerance) {
+				
+				direction = "up";
+			}
+			else if (distance[1] > swipeTolerance) {
+				
+				direction = "down";
+			}
+		}
+		if (direction != "" && player && !player.direction) {
+			player.direction = rotations[rotationIndexByKey(direction)];
+			handlePlayerMovement();
+		}
+		dragStartPos = null;
 	}
 }, false);
 
