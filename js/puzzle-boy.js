@@ -464,8 +464,6 @@ function resize() {
 	}
 	else {
 		
-		console.log($("#title").height());
-		console.log($("#title"));
 		$("#title").css({
 
 			position: "absolute",
@@ -651,7 +649,6 @@ function getImages(obj, className, catName) {
 $(document).ready(function() {
 
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
-	console.log(levelNr);
 	if (!isNaN(levelNr)) {
 		
 		if (levelNr >= levels.length) {
@@ -1191,7 +1188,7 @@ function checkPlayerCanMove(direction) {
 									var currentSprite = levelMap[centerField.row+(row-1)][centerField.col+(col-1)];
 									if (currentSprite.sprite.index != " " &&
 									 	currentSprite.sprite.index != "3" &&
-									 	currentSprite.sprite.index != "0") {
+									 	currentSprite.sprite.index != player.sprite.index) {
 										canPass = false;
 									}
 									else if (currentSprite.collisions) {
