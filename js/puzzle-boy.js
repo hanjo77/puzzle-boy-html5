@@ -1313,8 +1313,8 @@ $(document).swipe( {
    threshold:0
 });
 
-$(document).click(function(e) {
-	
+document.addEventListener('touchstart', function(e) {
+		
 	var timePassed = 10000;
 	if (!lastClick) {
 		
@@ -1329,7 +1329,7 @@ $(document).click(function(e) {
 		
 		switchPlayers()
 	}
-});
+}, false);
 
 $(document).keyup(function(e) {
 
