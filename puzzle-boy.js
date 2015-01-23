@@ -381,6 +381,22 @@ var sprites = {
 
 getImages(sprites);
 
+function resize() {
+	
+	if (canvas) {
+		
+		var offset = [($(document).width()-canvas.width)/2, ($(document).height()-canvas.height)/2];
+		$(canvas).css({
+		
+			position: "absolute",
+			top: offset[1],
+			left: offset[0] 
+		});
+		
+		$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+	}
+}
+
 function loadLevel(level) {
 	
 	players = [];
@@ -481,9 +497,15 @@ function loadLevel(level) {
 	context = canvas.getContext("2d");
 	
 	updateCollisionMaps();
+	resize();
 	
 	gameLoop = window.setInterval(drawPlayground, gameSpeed);
 }
+
+$(window).resize(function() {
+	
+	resize();
+});
 
 function switchPlayers() {
 
