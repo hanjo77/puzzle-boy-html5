@@ -569,11 +569,15 @@ function getImages(obj, className, catName) {
 $(document).ready(function() {
 
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
-	if (isNaN(levelNr)) {
+	console.log(levelNr);
+	if (!isNaN(levelNr)) {
+		
+		loadLevel(levels[levelNr]);
+	}
+	else {
 		
 		levelNr = 0;
 	}
-	loadLevel(levels[levelNr]);
 });
 
 function updateBlocks() {
@@ -1195,7 +1199,6 @@ function checkPlayerCanMove(direction) {
 			
 				levelNr++;
 				clearInterval(gameLoop);
-				loadLevel(levels[levelNr]);
 				console.log("LEVEL SOLVED");
 				window.location.hash = "level"+levelNr;
 				window.location.reload();
