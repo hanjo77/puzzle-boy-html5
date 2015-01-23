@@ -1,4 +1,4 @@
-var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop;
+var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps;
 
 var currentPlayer = 0;
 
@@ -404,6 +404,7 @@ function loadLevel(level) {
 	levelMap = [];
 	blocks = {};
 	levelArray = [];
+	undoSteps = [];
 	
 	var levelRows = level.split("\n");
 	
@@ -510,8 +511,6 @@ $(window).resize(function() {
 function switchPlayers() {
 
 	currentPlayer = (currentPlayer+1)%players.length;
-	console.log(player);
-	console.log(levelMap);
 	player = players[currentPlayer];
 }
 
@@ -569,10 +568,17 @@ function getImages(obj, className, catName) {
 $(document).ready(function() {
 
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
-	console.log(levelNr);
 	if (!isNaN(levelNr)) {
 		
-		loadLevel(levels[levelNr]);
+		if (levelNr >= levels.length) {
+			
+			window.location.hash = "";
+			levelNr = 0;
+		}
+		else {
+			
+			loadLevel(levels[levelNr]);
+		}
 	}
 	else {
 		
@@ -695,7 +701,7 @@ function drawPlayground() {
 				// second player
 				else if (sprite.index == "*") {
 					
-					players[1].sprite = sprite;
+					players[players.length-1].sprite = sprite;
 				}
 				// draw moveable blocks
 				else if (sprite && sprite.spriteClass == "block") {
@@ -1169,7 +1175,10 @@ function checkPlayerCanMove(direction) {
 								}
 							}
 							
-							centerField.rotation.direction = rotDirection;
+							if (centerField.rotation.angle != 0) {
+								
+								centerField.rotation.direction = rotDirection;
+							}
 						}
 					}
 				}
@@ -1197,11 +1206,26 @@ function checkPlayerCanMove(direction) {
 			}
 			else if (goalField.sprite.spriteClass == "goal") {
 			
-				levelNr++;
-				clearInterval(gameLoop);
-				console.log("LEVEL SOLVED");
-				window.location.hash = "level"+levelNr;
-				window.location.reload();
+				if (players.length > 1) {
+					
+					levelMap[player.pos[1]][player.pos[0]] = {
+						
+						"sprite": spriteMap[" "],
+						"col": player.pos[0],
+						"row": player.pos[1]
+					};
+					players.splice(currentPlayer, 1);
+					currentPlayer = 0;
+					player = players[currentPlayer];
+					tmpGoal = [player.pos[0], player.pos[1]];
+				}
+				else {
+					
+					levelNr++;
+					clearInterval(gameLoop);
+					window.location.hash = "level"+levelNr;
+					window.location.reload();
+				}
 			}
 			else if (goalField.sprite.spriteClass == "block") {
 				
