@@ -448,28 +448,54 @@ var sprites = {
 
 getImages(sprites);
 
-function resize() {
+function getImages(obj, className, catName) {
 	
-	if (canvas) {
+	var myClass = null;
+	var myCat = null;
+	if (className) {
+	
+		myClass = className;
+		obj.spriteClass = className;
+	}
+	if (catName) {
+	
+		myCat = catName;
+		obj.spriteCat = catName;
+	}
+	if (obj.url) {
 		
-		var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
-		$(canvas).css({
+		var drawing = new Image();
+		drawing.src = spritePath + obj.url;
+		obj.drawing = drawing;
+		if (obj.index) {
 		
-			position: "absolute",
-			top: offset[1],
-			left: offset[0] 
-		});
-		
-		$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+			spriteMap[obj.index] = obj;
+		}
 	}
 	else {
 		
-		$("#title").css({
-
-			position: "absolute",
-			top: ($(window).height()-$("#title img").height())/2,
-			left: ($(window).width()-$("#title img").width())/2
-		});
+		for (var key in obj) {
+			
+			if (catName) {
+			
+				obj[key].altSprites = sprites[myClass][myCat];
+			}			
+			if (className && !catName) {
+			
+				myCat = key;
+				getImages(obj[key], myClass, myCat);
+			}
+			if (!className) {
+			
+				myClass = key;
+				getImages(obj[key], myClass);
+			}
+			if (typeof obj[key] == "object") {
+			
+				obj[key].key = key;
+				getImages(obj[key], myClass, myCat);
+			}
+		}
 	}
 }
 
@@ -579,184 +605,6 @@ function loadLevel(level) {
 	gameLoop = window.setInterval(drawPlayground, gameSpeed);
 }
 
-$(window).resize(function() {
-	
-	resize();
-});
-
-window.addEventListener("orientationchange", function() {
-	
-	resize();
-}, false);
-
-function switchPlayers() {
-
-	currentPlayer = (currentPlayer+1)%players.length;
-	player = players[currentPlayer];
-}
-
-function getImages(obj, className, catName) {
-	
-	var myClass = null;
-	var myCat = null;
-	if (className) {
-	
-		myClass = className;
-		obj.spriteClass = className;
-	}
-	if (catName) {
-	
-		myCat = catName;
-		obj.spriteCat = catName;
-	}
-	if (obj.url) {
-		
-		var drawing = new Image();
-		drawing.src = spritePath + obj.url;
-		obj.drawing = drawing;
-		if (obj.index) {
-		
-			spriteMap[obj.index] = obj;
-		}
-	}
-	else {
-		
-		for (var key in obj) {
-			
-			if (catName) {
-			
-				obj[key].altSprites = sprites[myClass][myCat];
-			}			
-			if (className && !catName) {
-			
-				myCat = key;
-				getImages(obj[key], myClass, myCat);
-			}
-			if (!className) {
-			
-				myClass = key;
-				getImages(obj[key], myClass);
-			}
-			if (typeof obj[key] == "object") {
-			
-				obj[key].key = key;
-				getImages(obj[key], myClass, myCat);
-			}
-		}
-	}
-}
-
-$(document).ready(function() {
-
-	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
-	if (!isNaN(levelNr)) {
-		
-		if (levelNr >= levels.length) {
-			
-			window.location.hash = "";
-			levelNr = 0;
-		}
-		else {
-			
-			loadLevel(levels[levelNr]);
-		}
-	}
-	else {
-		
-		levelNr = 0;
-	}
-	resize();
-});
-
-function updateBlocks() {
-
-	for (var row = 0; row < levelMap.length; row++) {
-		
-		var levelRow = levelMap[row];
-		for (var col = 0; col < levelRow.length; col++) {
-		
-			var sprite = levelRow[col].sprite;
-			if (sprite.spriteClass == "block") {
-							
-				levelRow[col].sprite = spriteMap[levelArray[row][col]];
-				levelRow[col].col = col;
-				levelRow[col].row = row;
-				delete(levelRow[col].key);
-			}
-		}
-	}
-	for (var elem in blocks) {
-	
-		var block = blocks[elem];
-		var blockFills = true;
-		for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
-		
-			for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
-				
-				if (levelArray[row][col] != "3") {
-				
-					blockFills = false;
-				}
-				levelMap[row][col] = {
-					"sprite": spriteMap["Z"],
-					"col": col,
-					"row": row,
-					"key": elem
-				}
-			}
-		}
-		if (blockFills) {
-		
-			for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
-			
-				for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
-					
-					delete(levelMap[row][col].key);
-					levelArray[row][col] = " ";
-					levelMap[row][col] = {
-						"sprite": spriteMap[" "],
-						"col": col,
-						"row": row
-					}
-				}
-			}
-			delete(blocks[elem]);
-		}
-	}
-}
-
-function updateCollisionMaps() {
-
-	for (var row = 0; row < levelMap.length; row++) {
-		
-		var levelRow = levelMap[row];
-		for (var col = 0; col < levelRow.length; col++) {
-		
-			var sprite = levelRow[col];
-			if (sprite && sprite.sprite.spriteClass == "rotation") {
-		
-				var collisionMap = sprite.sprite.collisionMap.split("\n");
-				for (var innerRow = 0; innerRow < collisionMap.length; innerRow++) {
-				
-					var collisionRow = collisionMap[innerRow];
-					for (var innerCol = 0; innerCol < collisionRow.length; innerCol++) {
-					
-						var collision = collisionRow.charAt(innerCol);
-						var neighbourBlock = levelMap[row+(innerRow-1)][col+(innerCol-1)];
-						if (neighbourBlock && neighbourBlock.collisions) {
-							
-							neighbourBlock.collisions.push({
-								"key": collision,
-								"collider": sprite
-							});
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 function drawPlayground() {
 	
 	animate();
@@ -801,6 +649,7 @@ function drawPlayground() {
 						var startX = block.pos[0]*tileSize;
 						var startY = block.pos[1]*tileSize;
 						// top
+						
 						context.drawImage(sprite.drawing, 0, 0, 16, 16, 
 							startX+block.offsetX, 
 							startY+block.offsetY, 
@@ -1400,6 +1249,159 @@ function checkPlayerCanMove(direction) {
 	else {
 		
 		player.goal = player.pos;
+	}
+}
+
+
+function updateBlocks() {
+
+	for (var row = 0; row < levelMap.length; row++) {
+		
+		var levelRow = levelMap[row];
+		for (var col = 0; col < levelRow.length; col++) {
+		
+			var sprite = levelRow[col].sprite;
+			if (sprite.spriteClass == "block") {
+							
+				levelRow[col].sprite = spriteMap[levelArray[row][col]];
+				levelRow[col].col = col;
+				levelRow[col].row = row;
+				delete(levelRow[col].key);
+			}
+		}
+	}
+	for (var elem in blocks) {
+	
+		var block = blocks[elem];
+		var blockFills = true;
+		for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+		
+			for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+				
+				if (levelArray[row][col] != "3") {
+				
+					blockFills = false;
+				}
+				levelMap[row][col] = {
+					"sprite": spriteMap["Z"],
+					"col": col,
+					"row": row,
+					"key": elem
+				}
+			}
+		}
+		if (blockFills) {
+		
+			for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+			
+				for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+					
+					delete(levelMap[row][col].key);
+					levelArray[row][col] = " ";
+					levelMap[row][col] = {
+						"sprite": spriteMap[" "],
+						"col": col,
+						"row": row
+					}
+				}
+			}
+			delete(blocks[elem]);
+		}
+	}
+}
+
+function updateCollisionMaps() {
+
+	for (var row = 0; row < levelMap.length; row++) {
+		
+		var levelRow = levelMap[row];
+		for (var col = 0; col < levelRow.length; col++) {
+		
+			var sprite = levelRow[col];
+			if (sprite && sprite.sprite.spriteClass == "rotation") {
+		
+				var collisionMap = sprite.sprite.collisionMap.split("\n");
+				for (var innerRow = 0; innerRow < collisionMap.length; innerRow++) {
+				
+					var collisionRow = collisionMap[innerRow];
+					for (var innerCol = 0; innerCol < collisionRow.length; innerCol++) {
+					
+						var collision = collisionRow.charAt(innerCol);
+						var neighbourBlock = levelMap[row+(innerRow-1)][col+(innerCol-1)];
+						if (neighbourBlock && neighbourBlock.collisions) {
+							
+							neighbourBlock.collisions.push({
+								"key": collision,
+								"collider": sprite
+							});
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function switchPlayers() {
+
+	currentPlayer = (currentPlayer+1)%players.length;
+	player = players[currentPlayer];
+}
+
+$(document).ready(function() {
+
+	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
+	if (!isNaN(levelNr)) {
+		
+		if (levelNr >= levels.length) {
+			
+			window.location.hash = "";
+			levelNr = 0;
+		}
+		else {
+			
+			loadLevel(levels[levelNr]);
+		}
+	}
+	else {
+		
+		levelNr = 0;
+	}
+	resize();
+});
+
+$(window).resize(function() {
+	
+	resize();
+});
+
+window.addEventListener("orientationchange", function() {
+	
+	resize();
+}, false);
+
+function resize() {
+	
+	if (canvas) {
+		
+		var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
+		$(canvas).css({
+		
+			position: "absolute",
+			top: offset[1],
+			left: offset[0] 
+		});
+		
+		$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+	}
+	else {
+		
+		$("#title").css({
+
+			position: "absolute",
+			top: ($(window).height()-$("#title img").height())/2,
+			left: ($(window).width()-$("#title img").width())/2
+		});
 	}
 }
 
