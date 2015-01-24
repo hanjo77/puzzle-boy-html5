@@ -1314,48 +1314,64 @@ function checkPlayerCanMove(direction) {
 				if (levelArray[tmpGoal[1]][tmpGoal[0]] != "3") {
 				
 					var block = blocks[goalField.key];
-					var neighbour;
+					var neighbours = [];
 					var newPos = [block.pos[0], block.pos[1]];
 					switch (direction.key) {
 				
 						case "up":
 							
-							neighbour = levelMap[block.pos[1]-1][block.pos[0]];
+							for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+								
+								neighbours.push(levelMap[block.pos[1]-1][col]);
+							}
 							newPos[1]--;
 							break;
 						
 						case "right":
 							
-							neighbour = levelMap[block.pos[1]][block.pos[0]+block.size[0]];
+							for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+								
+								neighbours.push(levelMap[row][block.pos[0]+block.size[0]]);
+							}
 							newPos[0]++;
 							break;
 						
 						case "down":
 							
-							neighbour = levelMap[block.pos[1]+block.size[1]][block.pos[0]];
+							for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+								
+								neighbours.push(levelMap[block.pos[1]+block.size[1]][col]);
+							}
 							newPos[1]++;
 							break;
 						
 						case "left":
 
-							neighbour = levelMap[block.pos[1]][block.pos[0]-1];
+							for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+								
+								neighbours.push(levelMap[row][block.pos[0]-1]);
+							}
 							newPos[0]--;
 							break;
 					}
-					if (neighbour.sprite.index != " " && neighbour.sprite.index != "3") {
+					for (var neighbourCount = 0; neighbourCount < neighbours.length; neighbourCount++) {
 						
-						canPass = false;
-					}
-					if (neighbour && neighbour.collisions && neighbour.collisions.length) {
+						var neighbour = neighbours[neighbourCount];
+						if (neighbour.sprite.index != " " && neighbour.sprite.index != "3") {
 						
-						for (var collisionCount = 0; collisionCount < neighbour.collisions.length; collisionCount++) {
+							canPass = false;
+						}
+						if (neighbour && neighbour.collisions && neighbour.collisions.length) {
 						
-							if (
-								neighbour.collisions[collisionCount].key == "+" ||
-								neighbour.collisions[collisionCount].key == "-"
-								) {
+							for (var collisionCount = 0; collisionCount < neighbour.collisions.length; collisionCount++) {
 						
-								canPass = false;
+								if (
+									neighbour.collisions[collisionCount].key == "+" ||
+									neighbour.collisions[collisionCount].key == "-"
+									) {
+						
+									canPass = false;
+								}
 							}
 						}
 					}
@@ -1365,6 +1381,10 @@ function checkPlayerCanMove(direction) {
 						block.direction = direction;
 					}
 					
+				}
+				else {
+					
+					canPass = false;
 				}
 			}
 			else {
