@@ -1,4 +1,4 @@
-var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, gameLoop, dragStartPos;
+var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, gameLoop, dragStartPos, backgroundCanvas;
 
 var currentPlayer = 0;
 
@@ -64,6 +64,10 @@ var tileSize = 32;
 var spriteMap = {};
 
 var rotation = 0;
+
+var playerKeys = "0*#$";
+
+var bgKeys = "123 ";
 
 var playerIndexes = [];
 
@@ -316,6 +320,155 @@ var levels = ["111111111111111111\n"
 			+ "11                11\n"
 			+ "11111111111111111111",
 
+			  "1111111111\n"
+			+ "1        1\n"
+			+ "1 0 AA   1\n"
+			+ "1        1\n"
+			+ "11  111  1\n"
+			+ "1 BBBCCC 1\n"
+			+ "1        1\n"
+			+ "1  11    1\n"
+			+ "1  1233  1\n"
+			+ "1111111111",
+
+			  "11111111111111111111\n"
+			+ "1    11111111      1\n"
+			+ "1       AA         1\n"
+			+ "1    11111111      1\n"
+			+ "111111111111 f    g1\n"
+			+ "1  BB3333333   CCC 1\n"
+			+ "12 DD3333333   CCC01\n"
+			+ "1  EE3333333   CCC 1\n"
+			+ "1111111111111      1\n"
+			+ "1    1111111 e    h1\n"
+			+ "1       FF         1\n"
+			+ "1    1111111       1\n"
+			+ "11111111111111111111",
+
+			  "11111111111111111\n"
+			+ "11      1  AAA 11\n"
+			+ "1       1       1\n"
+			+ "1       13  B1  1\n"
+			+ "1       131CC1  1\n"
+			+ "1   2     1 31 01\n"
+			+ "1       13  1   1\n"
+			+ "1       13    D 1\n"
+			+ "1       1 3   D 1\n"
+			+ "11      1 EEE F11\n"
+			+ "11111111111111111",
+
+			  "11111111111111111\n"
+			+ "113  A   c     01\n"
+			+ "11 1b BB  C h  11\n"
+			+ "11 3 D   g   f 11\n"
+			+ "11 33  33 3cE  11\n"
+			+ "11 333   3  EF 11\n"
+			+ "11GG3   3HH E d11\n"
+			+ "11 b 1 3 HH  I 11\n"
+			+ "11 J  K 3   31 11\n"
+			+ "11 J f  f  h33 11\n"
+			+ "11           L 11\n"
+			+ "111  1     M LN11\n"
+			+ "1133311 h OM dN11\n"
+			+ "113 11    PP QN11\n"
+			+ "1233 1  e 3R  311\n"
+			+ "11111111111111111",
+
+			  "11111111111111111111\n"
+			+ "111   f         1111\n"
+			+ "111f    f a a g 1111\n"
+			+ "111   A         1111\n"
+			+ "11   BB   l      111\n"
+			+ "11 CCBB h     e D111\n"
+			+ "11 CC E F   h  G 111\n"
+			+ "12   1 HI n  b J  01\n"
+			+ "11 KK L M   g  N 111\n"
+			+ "11 KKOO g     f P111\n"
+			+ "11   OO   l      111\n"
+			+ "111   Q         1111\n"
+			+ "111e    e c c h 1111\n"
+			+ "111   e         1111\n"
+			+ "11111111111111111111",
+
+			  "111111111111111\n"
+			+ "1111111111  111\n"
+			+ "110  A  BB33111\n"
+			+ "11 a     1 C111\n"
+			+ "11 d f 1  1 111\n"
+			+ "11  D  1EFFF111\n"
+			+ "11G 3 HH  3 111\n"
+			+ "11    1    3  1\n"
+			+ "11333   133 1 1\n"
+			+ "11   III1 1   1\n"
+			+ "11 k III   3111\n"
+			+ "11    111 m 111\n"
+			+ "1  J1 1     111\n"
+			+ "1     3 1 1 111\n"
+			+ "111111111 1 111\n"
+			+ "112 3   3  3111\n"
+			+ "111111111111111",
+
+			  "11111111111111111111\n"
+			+ "1                  1\n"
+			+ "1   111111111111   1\n"
+			+ "1   11111  11111   1\n"
+			+ "1   11  A   B011   1\n"
+			+ "1   11    a  C11   1\n"
+			+ "1   11 n D    11   1\n"
+			+ "1   1   1 d h  1   1\n"
+			+ "1   1  11   E3 1   1\n"
+			+ "1   11     11 11   1\n"
+			+ "1   113   1 F 11   1\n"
+			+ "1   113a G3   11   1\n"
+			+ "1   11311  11111   1\n"
+			+ "1   113111111111   1\n"
+			+ "1   113111111111   1\n"
+			+ "1 2                1\n"
+			+ "1                  1\n"
+			+ "11111111111111111111",
+
+			  "111111111111111111\n"
+			+ "11 11111  11 1   1\n"
+			+ "1   A   f C  3   1\n"
+			+ "1   A  B  C  1   1\n"
+			+ "1   A  B  C  1   1\n"
+			+ "1   A  B  C  1   1\n"
+			+ "1  0A *B #C $1   1\n"
+			+ "1   A  B  C  1   1\n"
+			+ "1   A  B  C  1   1\n"
+			+ "1 E A  B  C  1   1\n"
+			+ "1    e B   e 1 2 1\n"
+			+ "111 1  1111  1   1\n"
+			+ "111111111111111111",
+
+			  "111111111111111111\n"
+			+ "1113A BB    11 C01\n"
+			+ "111D  BB  a   EEF1\n"
+			+ "111   GG   33 EE 1\n"
+			+ "111 g 111 nH1  f 1\n"
+			+ "111    11   II3  1\n"
+			+ "111 m     J    K 1\n"
+			+ "111   1 11311L K 1\n"
+			+ "1113M      33    1\n"
+			+ "1111 111 111 3 1 1\n"
+			+ "111  13  111N3 331\n"
+			+ "111 OOP 111   1  1\n"
+			+ "1133OO3     3  Q31\n"
+			+ "1  311111111111111\n"
+			+ "12 111111111111111\n"
+			+ "111111111111111111",
+
+			  "11111111111111111111\n"
+			+ "1333333333133A B 111\n"
+			+ "13333333131 C  D 111\n"
+			+ "13331333331 C EE 111\n"
+			+ "1333313333FGGG H I 1\n"
+			+ "1231333333 JJ  H 0 1\n"
+			+ "1333313333KLLL H M 1\n"
+			+ "13331333331 N OO 111\n"
+			+ "13333333131 N  P 111\n"
+			+ "1333333333133Q R 111\n"
+			+ "11111111111111111111",
 ];
 
 var levelNr = 0;
@@ -729,7 +882,7 @@ function loadLevel(level) {
 			var char = rowString.charAt(col);
 			if (spriteMap[char]) {
 				
-				if (char != "0" && char != "*" && char != "#") {
+				if (playerKeys.indexOf(char) < 0) {
 				
 					rawLevelRow.push(char);
 				}
@@ -810,7 +963,40 @@ function loadLevel(level) {
 	updateCollisionMaps();
 	resize();
 	
+	backgroundCanvas = drawBackground();
 	drawPlayground();
+}
+
+function drawBackground() {
+	
+	var bgCanvas = document.createElement("canvas");
+	bgCanvas.width = levelMap[0].length*tileSize;
+	bgCanvas.height = levelMap.length*tileSize;
+	var bgContext = bgCanvas.getContext("2d");	
+	var col, row;
+	for (row = 0; row < levelMap.length; row++) {
+		
+		var levelRow = levelMap[row];
+		for (col = 0; col < levelRow.length; col++) {
+			
+			levelRow[col].collisions = [];
+			var sprite = levelRow[col].sprite;
+			if (sprite && sprite.drawing) {
+
+				var drawing = sprite.drawing;
+				if (bgKeys.indexOf(sprite.index) == -1) {
+					
+					drawing = spriteMap[" "].drawing;
+				}
+				var pos = [
+					((tileSize / 2)+(col*tileSize))-(tileSize/2), 
+					((tileSize / 2)+(row*tileSize))-(tileSize/2)
+				];
+				bgContext.drawImage(drawing, pos[0], pos[1]);
+			}
+		}
+	}
+	return bgCanvas;
 }
 
 function getBlockCanvas(blockField) {
@@ -821,59 +1007,58 @@ function getBlockCanvas(blockField) {
 	var block = blocks[blockField.key];
 	blockCanvas.width = block.size[0]*tileSize;
 	blockCanvas.height = block.size[1]*tileSize;
-	blockContext.fillStyle = "rgba(0, 0, 200, 0.5)";
 	blockContext.clearRect(0, 0, blockCanvas.width, blockCanvas.height);
 		
-	blockContext.drawImage(sprite.drawing, 0, 0, 16, 16, 
+	blockContext.drawImage(sprite.drawing, 0, 0, (tileSize/2), (tileSize/2), 
 		0, 
 		0, 
-		16, 
-		16);
-	blockContext.drawImage(sprite.drawing, 16, 0, 1, 16, 
-		16, 
+		(tileSize/2), 
+		(tileSize/2));
+	blockContext.drawImage(sprite.drawing, (tileSize/2), 0, 1, (tileSize/2), 
+		(tileSize/2), 
 		0, 
-		(block.size[0]-1)*32, 
-		16);
-	blockContext.drawImage(sprite.drawing, 48, 0, 16, 16, 
-		((block.size[0]-1)*32)+16, 
+		(block.size[0]-1)*tileSize, 
+		(tileSize/2));
+	blockContext.drawImage(sprite.drawing, (tileSize/2)*3, 0, (tileSize/2), (tileSize/2), 
+		((block.size[0]-1)*tileSize)+(tileSize/2), 
 		0, 
-		16, 
-		16);
+		(tileSize/2), 
+		(tileSize/2));
 	// middle
 	// if (block.size[1] > 2) {
 		
-		blockContext.drawImage(sprite.drawing, 0, 16, 16, 1, 
+		blockContext.drawImage(sprite.drawing, 0, (tileSize/2), (tileSize/2), 1, 
 			0, 
-			16, 
-			16, 
-			(block.size[1]-1)*32);
-		blockContext.drawImage(sprite.drawing, 16, 16, 1, 1, 
-			16, 
-			16, 
-			(block.size[0]-1)*32, 
-			(block.size[1]-1)*32);
-		blockContext.drawImage(sprite.drawing, 48, 16, 16, 1, 
-			((block.size[0]-1)*32)+16, 
-			16, 
-			16, 
-			(block.size[1]-1)*32);
+			(tileSize/2), 
+			(tileSize/2), 
+			(block.size[1]-1)*tileSize);
+		blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2), 1, 1, 
+			(tileSize/2), 
+			(tileSize/2), 
+			(block.size[0]-1)*tileSize, 
+			(block.size[1]-1)*tileSize);
+		blockContext.drawImage(sprite.drawing, (tileSize/2)*3, (tileSize/2), (tileSize/2), 1, 
+			((block.size[0]-1)*tileSize)+(tileSize/2), 
+			(tileSize/2), 
+			(tileSize/2), 
+			(block.size[1]-1)*tileSize);
 	// }
 	// bottom
-	blockContext.drawImage(sprite.drawing, 0, 48, 16, 16, 
+	blockContext.drawImage(sprite.drawing, 0, (tileSize/2)*3, (tileSize/2), (tileSize/2), 
 		0, 
-		((block.size[1]-1)*32)+16, 
-		16, 
-		16);
-	blockContext.drawImage(sprite.drawing, 16, 48, 1, 16, 
-		16, 
-		((block.size[1]-1)*32)+16, 
-		(block.size[0]-1)*32, 
-		16);
-	blockContext.drawImage(sprite.drawing, 48, 48, 16, 16, 
-		((block.size[0]-1)*32)+16, 
-		((block.size[1]-1)*32)+16, 
-		16, 
-		16);
+		((block.size[1]-1)*tileSize)+(tileSize/2), 
+		(tileSize/2), 
+		(tileSize/2));
+	blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2)*3, 1, (tileSize/2), 
+		(tileSize/2), 
+		((block.size[1]-1)*tileSize)+(tileSize/2), 
+		(block.size[0]-1)*tileSize, 
+		(tileSize/2));
+	blockContext.drawImage(sprite.drawing, (tileSize/2)*3, (tileSize/2)*3, (tileSize/2), (tileSize/2), 
+		((block.size[0]-1)*tileSize)+(tileSize/2), 
+		((block.size[1]-1)*tileSize)+(tileSize/2), 
+		(tileSize/2), 
+		(tileSize/2));
 
 	return blockCanvas;
 }
@@ -884,26 +1069,7 @@ function drawPlayground() {
 	animate();
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
 	// draw background
-	for (var row = 0; row < levelMap.length; row++) {
-		
-		var levelRow = levelMap[row];
-		for (var col = 0; col < levelRow.length; col++) {
-			
-			levelRow[col].collisions = [];
-			var sprite = levelRow[col].sprite;
-			if (sprite && sprite.drawing && sprite.index == "3") {
-
-				var pos = [
-					(tileSize / 2)+(col*tileSize), 
-					(tileSize / 2)+(row*tileSize)
-				];
-				context.save();
-				context.translate(pos[0], pos[1]);
-				context.drawImage(sprite.drawing, sprite.drawing.width/-2, sprite.drawing.height/-2);
-				context.restore();
-			}
-		}
-	}
+	context.drawImage(backgroundCanvas, 0, 0);
 	for (var row = 0; row < levelMap.length; row++) {
 		
 		var levelRow = levelMap[row];
@@ -933,22 +1099,14 @@ function drawPlayground() {
 				
 						for (var elem in blocks) {
 					
-							// Draw a hole tile if it's under the block
-							if (levelArray[row][col] != " ") {
-						
-								var bgSprite = spriteMap[levelArray[row][col]];
-								context.drawImage(bgSprite.drawing, pos[0]-(bgSprite.drawing.width/2), pos[1]-(bgSprite.drawing.height/2));
-							}
-					
 							var block = blocks[elem];
 							var startX = block.pos[0]*tileSize;
 							var startY = block.pos[1]*tileSize;
-							// top
 							context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 						}
 					}
 					// all others
-					else {
+					else if (bgKeys.indexOf(sprite.index) == -1) {
 					
 						context.save();
 						context.translate(pos[0], pos[1]);
@@ -1539,14 +1697,20 @@ function updateBlocks() {
 			for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
 			
 				for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
-					
+
+					var sprite = spriteMap[" "];
 					delete(levelMap[row][col].key);
 					levelArray[row][col] = " ";
 					levelMap[row][col] = {
-						"sprite": spriteMap[" "],
+						"sprite": sprite,
 						"col": col,
 						"row": row
 					}
+					var pos = [
+						((tileSize / 2)+(col*tileSize))-(tileSize/2), 
+						((tileSize / 2)+(row*tileSize))-(tileSize/2)
+					];
+					backgroundCanvas.getContext("2d").drawImage(sprite.drawing, pos[0], pos[1]);
 				}
 			}
 			delete(blocks[elem]);
