@@ -1,4 +1,4 @@
-var canvas, context, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, dragStartPos;
+var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, dragStartPos;
 
 var currentPlayer = 0;
 
@@ -65,7 +65,7 @@ var spriteMap = {};
 
 var rotation = 0;
 
-var playerIndexes = ["0", "*"];
+var playerIndexes = [];
 
 var levels = ["111111111111111111\n"
 			+ "1   1        1   1\n"
@@ -185,6 +185,119 @@ var levels = ["111111111111111111\n"
 			+ "1 2  133331 G 1 1\n"
 			+ "1      3331     1\n"
 			+ "11111111111111111",
+
+			  "1111111111111\n"
+			+ "1  1 3A31   1\n"
+			+ "1  1  A 1   1\n"
+			+ "1  1 BA  1  1\n"
+			+ "1  1     1  1\n"
+			+ "1  1331 C   1\n"
+			+ "12  3333CDD01\n"
+			+ "1  1331 C   1\n"
+			+ "1  1     1  1\n"
+			+ "1  1 EF  1  1\n"
+			+ "1  1  F 1   1\n"
+			+ "1  1 3F31   1\n"
+			+ "1111111111111",
+
+			  "1111111111111111\n"
+			+ "1   1      13331\n"
+			+ "1 AA1 0    1   1\n"
+			+ "1   3   BBB1CC 1\n"
+			+ "11113   BBB1CC 1\n"
+			+ "1 DD33  33313331\n"
+			+ "1 DD333 33     1\n"
+			+ "1 DD333        1\n"
+			+ "1   333   333E 1\n"
+			+ "1   1      33E 1\n"
+			+ "1   1      33E 1\n"
+			+ "111113     11111\n"
+			+ "1    3   33  G 1\n"
+			+ "1 FFF311133  G 1\n"
+			+ "1     1233     1\n"
+			+ "1111111111111111",
+
+			  "111111111111111111\n"
+			+ "111111   111   111\n"
+			+ "1   11 m     1   1\n"
+			+ "1 0      1 g 1 o 1\n"
+			+ "1   1111     A   1\n"
+			+ "11111111 1 11111 1\n"
+			+ "111111   1    11 1\n"
+			+ "111111 e 1 l     1\n"
+			+ "111111        o 11\n"
+			+ "1   11 1 111    11\n"
+			+ "1 2 3     11111111\n"
+			+ "1   111   11111111\n"
+			+ "111111111111111111",
+
+			  "11111111111111111111\n"
+			+ "11111111    11111111\n"
+			+ "1111111     11111111\n"
+			+ "1111111 A 3 11111111\n"
+			+ "1111111 A 3      111\n"
+			+ "1    33 A11C       1\n"
+			+ "1 2 1333AB CDDDE 0 1\n"
+			+ "1    33 F11C   E   1\n"
+			+ "1111111 F 3      111\n"
+			+ "1111111 F   11111111\n"
+			+ "1111111 F   11111111\n"
+			+ "11111111    11111111\n"
+			+ "11111111111111111111",
+
+			  "11111111111111\n"
+			+ "1     11 g g 1\n"
+			+ "1   k 1      1\n"
+			+ "1    A1B     1\n"
+			+ "11   A B 11 C1\n"
+			+ "1  l A1B     1\n"
+			+ "1     1     31\n"
+			+ "1    11111 h31\n"
+			+ "1 DD 01233   1\n"
+			+ "1    1111    1\n"
+			+ "1     1      1\n"
+			+ "1  l E1F     1\n"
+			+ "1    E F G1 H1\n"
+			+ "11   E1F     1\n"
+			+ "1   m 1      1\n"
+			+ "1  3  11 h h 1\n"
+			+ "11111111111111",
+
+			  "11111111111111111111\n"
+			+ "1         AAAA     1\n"
+			+ "1   11111 1111 1   1\n"
+			+ "1   1  33313 B 1   1\n"
+			+ "1   1  33113 CD1   1\n"
+			+ "1   1  33333 C 1   1\n"
+			+ "1   1  33333 C 1   1\n"
+			+ "1   1  33333 O 1   1\n"
+			+ "1   1EE313331F11   1\n"
+			+ "1   1   1 GH1  1   1\n"
+			+ "1   1   1 G 1  1   1\n"
+			+ "1   1  I1  J K 1   1\n"
+			+ "1 2 1   1 L MN 1 0 1\n"
+			+ "1   1   1    N 1   1\n"
+			+ "11111111111111111111",
+
+			  "111111111111111\n"
+			+ "1  2 1111111111\n"
+			+ "1    1111111111\n"
+			+ "111  11 A 11111\n"
+			+ "11  11  A  1111\n"
+			+ "13311 BBB g 111\n"
+			+ "1CC3DD EE    11\n"
+			+ "11 FDD  GGHH 11\n"
+			+ "111 DDf  I    1\n"
+			+ "1111 J  KK  1 1\n"
+			+ "1111  1   L11*1\n"
+			+ "1111  111ML1111\n"
+			+ "11111N111  1111\n"
+			+ "11111 1111  111\n"
+			+ "1111  11111 111\n"
+			+ "1111 111111 111\n"
+			+ "111# 11110  111\n"
+			+ "111111111111111",
+
 ];
 
 var levelNr = 0;
@@ -202,75 +315,111 @@ var levelNr = 0;
 
 var sprites = {
 		
-	"puzzle-boy": {
+	"player-potatoe": {
 		
 		"up": [
 			{
-				"url": "puzzle-boy-up-1.png",
+				"url": "player-potatoe-up-1.png",
 			},
 			{
-				"url": "puzzle-boy-up-2.png",
+				"url": "player-potatoe-up-2.png",
 			}
 		],
 		"right": [
 			{
-				"url": "puzzle-boy-right-1.png",
+				"url": "player-potatoe-right-1.png",
 			},
 			{
-				"url": "puzzle-boy-right-2.png",
+				"url": "player-potatoe-right-2.png",
 			}
 		],
 		"down": [
 			{
 				"index": "0",
-				"url": "puzzle-boy-down-1.png",
+				"url": "player-potatoe-down-1.png",
 			},
 			{
-				"url": "puzzle-boy-down-2.png",
+				"url": "player-potatoe-down-2.png",
 			}
 		],
 		"left": [
 			{
-				"url": "puzzle-boy-left-1.png",
+				"url": "player-potatoe-left-1.png",
 			},
 			{
-				"url": "puzzle-boy-left-2.png",
+				"url": "player-potatoe-left-2.png",
 			}
 		]
 	},
-	"puzzle-girl": {
+	"player-eggplant": {
 		
 		"up": [
 			{
-				"url": "puzzle-girl-up-1.png",
+				"url": "player-eggplant-up-1.png",
 			},
 			{
-				"url": "puzzle-girl-up-2.png",
+				"url": "player-eggplant-up-2.png",
 			}
 		],
 		"right": [
 			{
-				"url": "puzzle-girl-right-1.png",
+				"url": "player-eggplant-right-1.png",
 			},
 			{
-				"url": "puzzle-girl-right-2.png",
+				"url": "player-eggplant-right-2.png",
 			}
 		],
 		"down": [
 			{
 				"index": "*",
-				"url": "puzzle-girl-down-1.png",
+				"url": "player-eggplant-down-1.png",
 			},
 			{
-				"url": "puzzle-girl-down-2.png",
+				"url": "player-eggplant-down-2.png",
 			}
 		],
 		"left": [
 			{
-				"url": "puzzle-girl-left-1.png",
+				"url": "player-eggplant-left-1.png",
 			},
 			{
-				"url": "puzzle-girl-left-2.png",
+				"url": "player-eggplant-left-2.png",
+			}
+		]
+	},
+	"player-carrot": {
+		
+		"up": [
+			{
+				"url": "player-carrot-up-1.png",
+			},
+			{
+				"url": "player-carrot-up-2.png",
+			}
+		],
+		"right": [
+			{
+				"url": "player-carrot-right-1.png",
+			},
+			{
+				"url": "player-carrot-right-2.png",
+			}
+		],
+		"down": [
+			{
+				"index": "#",
+				"url": "player-carrot-down-1.png",
+			},
+			{
+				"url": "player-carrot-down-2.png",
+			}
+		],
+		"left": [
+			{
+				"url": "player-carrot-left-1.png",
+			},
+			{
+				"url": "player-carrot-left-2.png",
 			}
 		]
 	},
@@ -507,6 +656,7 @@ function loadLevel(level) {
 	blocks = {};
 	levelArray = [];
 	undoSteps = [];
+	playerIndexes = [];
 	
 	var levelRows = level.split("\n");
 	
@@ -525,34 +675,36 @@ function loadLevel(level) {
 			var char = rowString.charAt(col);
 			if (spriteMap[char]) {
 				
-				if (char != "0" && char != "*") {
+				if (char != "0" && char != "*" && char != "#") {
 				
 					rawLevelRow.push(char);
 				}
 				else {
 				
 					rawLevelRow.push(" ");
-				}
-				
-				levelRow.push({
-					"sprite": spriteMap[char],
-					"col": col,
-					"row": row
-				});
-			
-				if (char == "0" || char == "*") {
-				
+					playerIndexes.push(char);
 					var tmpPlayer = {
+						"sprite": spriteMap[char],
 						"pos": [col, row],
 						"goal": [col, row],
 						"offsetX": 0,
 						"offsetY": 0,
 						"direction": null,
-						"animFrame": 0
+						"animFrame": 0,
+						"spriteIndex": char
 					};
 					players.push(tmpPlayer);
-					player = players[0];
+					if (char == "0") {
+						
+						player = tmpPlayer;
+						currentPlayer = players.length-1;
+					}
 				}
+				levelRow.push({
+					"sprite": spriteMap[char],
+					"col": col,
+					"row": row
+				});
 			}
 			else {
 			
@@ -617,116 +769,136 @@ function drawPlayground() {
 			
 			levelRow[col].collisions = [];
 			var sprite = levelRow[col].sprite;
-			if (sprite && sprite.drawing && sprite.index != " ") {
+			if (sprite && sprite.drawing && sprite.index == "3") {
 
 				var pos = [
 					(tileSize / 2)+(col*tileSize), 
 					(tileSize / 2)+(row*tileSize)
 				];
-				// first player
-				if (sprite.index == "0") {
+				context.save();
+				context.translate(pos[0], pos[1]);
+				context.drawImage(sprite.drawing, sprite.drawing.width/-2, sprite.drawing.height/-2);
+				context.restore();
+			}
+		}
+	}
+	for (var row = 0; row < levelMap.length; row++) {
+		
+		var levelRow = levelMap[row];
+		for (var col = 0; col < levelRow.length; col++) {
+			
+			levelRow[col].collisions = [];
+			var sprite = levelRow[col].sprite;
+			if (sprite && sprite.drawing && sprite.index != " " && sprite.index != "3") {
+
+				var pos = [
+					(tileSize / 2)+(col*tileSize), 
+					(tileSize / 2)+(row*tileSize)
+				];
+				// player sprites
+				var isPlayer = false;
+				for (var i = 0; i < players.length; i++) {
 					
-					players[0].sprite = sprite;
-				}
-				// second player
-				else if (sprite.index == "*") {
+					if (sprite.index == players[i].spriteIndex) {
 					
-					players[players.length-1].sprite = sprite;
+						isPlayer = true;
+					}
 				}
 				// draw moveable blocks
-				else if (sprite && sprite.spriteClass == "block") {
+				if (!isPlayer) {
+					
+					if (sprite && sprite.spriteClass == "block") {
 				
-					for (var elem in blocks) {
+						for (var elem in blocks) {
 					
-						// Draw a hole tile if it's under the block
-						if (levelArray[row][col] != " ") {
+							// Draw a hole tile if it's under the block
+							if (levelArray[row][col] != " ") {
 						
-							var bgSprite = spriteMap[levelArray[row][col]];
-							context.drawImage(bgSprite.drawing, pos[0]-(bgSprite.drawing.width/2), pos[1]-(bgSprite.drawing.height/2));
-						}
+								var bgSprite = spriteMap[levelArray[row][col]];
+								context.drawImage(bgSprite.drawing, pos[0]-(bgSprite.drawing.width/2), pos[1]-(bgSprite.drawing.height/2));
+							}
 					
-						var block = blocks[elem];
-						var startX = block.pos[0]*tileSize;
-						var startY = block.pos[1]*tileSize;
-						// top
+							var block = blocks[elem];
+							var startX = block.pos[0]*tileSize;
+							var startY = block.pos[1]*tileSize;
+							// top
 						
-						context.drawImage(sprite.drawing, 0, 0, 16, 16, 
-							startX+block.offsetX, 
-							startY+block.offsetY, 
-							16, 
-							16);
-						context.drawImage(sprite.drawing, 16, 0, 1, 16, 
-							startX+16+block.offsetX, 
-							startY+block.offsetY, 
-							(block.size[0]-1)*32, 
-							16);
-						context.drawImage(sprite.drawing, 48, 0, 16, 16, 
-							startX+((block.size[0]-1)*32)+16+block.offsetX, 
-							startY+block.offsetY, 
-							16, 
-							16);
-						// middle
-						//if (block.size[1] > 1) {
-								
-							context.drawImage(sprite.drawing, 0, 16, 16, 1, 
+							context.drawImage(sprite.drawing, 0, 0, 16, 16, 
 								startX+block.offsetX, 
-								startY+16+block.offsetY, 
+								startY+block.offsetY, 
 								16, 
-								(block.size[1]-1)*32);
-							context.drawImage(sprite.drawing, 16, 16, 1, 1, 
+								16);
+							context.drawImage(sprite.drawing, 16, 0, 1, 16, 
 								startX+16+block.offsetX, 
-								startY+16+block.offsetY, 
+								startY+block.offsetY, 
 								(block.size[0]-1)*32, 
-								(block.size[1]-1)*32);
-							context.drawImage(sprite.drawing, 48, 16, 16, 1, 
+								16);
+							context.drawImage(sprite.drawing, 48, 0, 16, 16, 
 								startX+((block.size[0]-1)*32)+16+block.offsetX, 
-								startY+16+block.offsetY, 
+								startY+block.offsetY, 
 								16, 
-								(block.size[1]-1)*32);
-						//}
-						// bottom
-						context.drawImage(sprite.drawing, 0, 48, 16, 16, 
-							startX+block.offsetX, 
-							startY+((block.size[1]-1)*32)+16+block.offsetY, 
-							16, 
-							16);
-						context.drawImage(sprite.drawing, 16, 48, 1, 16, 
-							startX+16+block.offsetX, 
-							startY+((block.size[1]-1)*32)+16+block.offsetY, 
-							(block.size[0]-1)*32, 
-							16);
-						context.drawImage(sprite.drawing, 48, 48, 16, 16, 
-							startX+((block.size[0]-1)*32)+16+block.offsetX, 
-							startY+((block.size[1]-1)*32)+16+block.offsetY, 
-							16, 
-							16);
+								16);
+							// middle
+							//if (block.size[1] > 1) {
+								
+								context.drawImage(sprite.drawing, 0, 16, 16, 1, 
+									startX+block.offsetX, 
+									startY+16+block.offsetY, 
+									16, 
+									(block.size[1]-1)*32);
+								context.drawImage(sprite.drawing, 16, 16, 1, 1, 
+									startX+16+block.offsetX, 
+									startY+16+block.offsetY, 
+									(block.size[0]-1)*32, 
+									(block.size[1]-1)*32);
+								context.drawImage(sprite.drawing, 48, 16, 16, 1, 
+									startX+((block.size[0]-1)*32)+16+block.offsetX, 
+									startY+16+block.offsetY, 
+									16, 
+									(block.size[1]-1)*32);
+							//}
+							// bottom
+							context.drawImage(sprite.drawing, 0, 48, 16, 16, 
+								startX+block.offsetX, 
+								startY+((block.size[1]-1)*32)+16+block.offsetY, 
+								16, 
+								16);
+							context.drawImage(sprite.drawing, 16, 48, 1, 16, 
+								startX+16+block.offsetX, 
+								startY+((block.size[1]-1)*32)+16+block.offsetY, 
+								(block.size[0]-1)*32, 
+								16);
+							context.drawImage(sprite.drawing, 48, 48, 16, 16, 
+								startX+((block.size[0]-1)*32)+16+block.offsetX, 
+								startY+((block.size[1]-1)*32)+16+block.offsetY, 
+								16, 
+								16);
+						}
 					}
-				}
-				// all others
-				else {
+					// all others
+					else {
 					
-					context.save();
-					context.translate(pos[0], pos[1]);
-					if (levelRow[col].rotation) {
+						context.save();
+						context.translate(pos[0], pos[1]);
+						if (levelRow[col].rotation) {
 					
-						context.rotate(levelRow[col].rotation.current);
+							context.rotate(levelRow[col].rotation.current);
+						}
+						context.drawImage(sprite.drawing, sprite.drawing.width/-2, sprite.drawing.height/-2);
+						context.restore();
 					}
-					context.drawImage(sprite.drawing, sprite.drawing.width/-2, sprite.drawing.height/-2);
-					context.restore();
 				}
 			}
 		}
 	}
 	// draw players
-	if (player.sprite) {
-		
-		context.drawImage(player.sprite.altSprites[Math.round(player.animFrame/animSpeed)].drawing, 				(player.pos[0]*tileSize)+player.offsetX, 
-				(player.pos[1]*tileSize)+player.offsetY);			
-	}
-	if (players.length > 1) {
-	
-		var otherPlayer = players[(currentPlayer+1)%players.length];
-		context.drawImage(otherPlayer.sprite.drawing, 			(otherPlayer.pos[0]*tileSize)+otherPlayer.offsetX, 			(otherPlayer.pos[1]*tileSize)+otherPlayer.offsetY);			
+		for (var i = 0; i < players.length; i++) {
+			
+			var otherPlayer = players[i];
+			if (otherPlayer.sprite) {
+				
+				context.drawImage(otherPlayer.sprite.altSprites[Math.round(otherPlayer.animFrame/animSpeed)].drawing, (otherPlayer.pos[0]*tileSize)+otherPlayer.offsetX, (otherPlayer.pos[1]*tileSize)+otherPlayer.offsetY);	
+		}
 	}
 	updateCollisionMaps();
 }
@@ -908,7 +1080,7 @@ function animate() {
 			levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
 			oldPos = [player.pos[0], player.pos[1]];
 		}
-		levelMap[player.pos[1]][player.pos[0]].sprite = player.sprite;
+		
 	}
 }
 
@@ -1506,6 +1678,7 @@ function handlePlayerMovement() {
 			var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
 			sprite.index = playerIndexes[currentPlayer];
 			player.sprite = sprite;
+			players[currentPlayer].sprite = sprite;
 		}
 	}
 }
