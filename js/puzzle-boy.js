@@ -298,6 +298,24 @@ var levels = ["111111111111111111\n"
 			+ "111# 11110  111\n"
 			+ "111111111111111",
 
+			  "11111111111111111111\n"
+			+ "11       0        11\n"
+			+ "1  AABB CCDD EEFF  1\n"
+			+ "1  AABB CCDD EEFF  1\n"
+			+ "1 h  G HHIIJJ K  e 1\n"
+			+ "11   G   II   K   11\n"
+			+ "11  LL        MM  11\n"
+			+ "1 f LL NNOOPP MM g 1\n"
+			+ "1    QQ  OO  RR    1\n"
+			+ "11   QQ SSTT RR   11\n"
+			+ "11  UU  SSTT  VV  11\n"
+			+ "11  UU        VV  11\n"
+			+ "111111111 1111111111\n"
+			+ "1                  1\n"
+			+ "1        2         1\n"
+			+ "11                11\n"
+			+ "11111111111111111111",
+
 ];
 
 var levelNr = 0;
@@ -420,6 +438,42 @@ var sprites = {
 			},
 			{
 				"url": "player-carrot-left-2.png",
+			}
+		]
+	},
+	"player-pepper": {
+		
+		"up": [
+			{
+				"url": "player-pepper-up-1.png",
+			},
+			{
+				"url": "player-pepper-up-2.png",
+			}
+		],
+		"right": [
+			{
+				"url": "player-pepper-right-1.png",
+			},
+			{
+				"url": "player-pepper-right-2.png",
+			}
+		],
+		"down": [
+			{
+				"index": "$",
+				"url": "player-pepper-down-1.png",
+			},
+			{
+				"url": "player-pepper-down-2.png",
+			}
+		],
+		"left": [
+			{
+				"url": "player-pepper-left-1.png",
+			},
+			{
+				"url": "player-pepper-left-2.png",
 			}
 		]
 	},
