@@ -1,4 +1,4 @@
-var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, gameLoop, undoSteps, dragStartPos;
+var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, dragStartPos;
 
 var currentPlayer = 0;
 
@@ -808,7 +808,7 @@ function loadLevel(level) {
 	updateCollisionMaps();
 	resize();
 	
-	gameLoop = window.setInterval(drawPlayground, gameSpeed);
+	requestAnimationFrame(drawPlayground);
 }
 
 function drawPlayground() {
@@ -955,6 +955,7 @@ function drawPlayground() {
 		}
 	}
 	updateCollisionMaps();
+	requestAnimationFrame(drawPlayground);
 }
 
 function animate() {
