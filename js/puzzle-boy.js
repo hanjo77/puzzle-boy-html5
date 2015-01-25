@@ -1,4 +1,4 @@
-var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, dragStartPos;
+var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, gameLoop, dragStartPos;
 
 var currentPlayer = 0;
 
@@ -763,6 +763,12 @@ function loadLevel(level) {
 			else {
 			
 				rawLevelRow.push(" ");
+				var blockField = {
+					"sprite": spriteMap["Z"],
+					"col": col,
+					"row": row,
+					"key": char
+				};
 				if (!blocks[char]) {
 				
 					var width = 0;
@@ -786,13 +792,9 @@ function loadLevel(level) {
 						"offsetX": 0,
 						"offsetY": 0
 					};
+					blocks[char].canvas = getBlockCanvas(blockField);
 				}
-				levelRow.push({
-					"sprite": spriteMap["Z"],
-					"col": col,
-					"row": row,
-					"key": char
-				});
+				levelRow.push(blockField);
 			}
 		}
 		levelMap.push(levelRow);
@@ -808,11 +810,77 @@ function loadLevel(level) {
 	updateCollisionMaps();
 	resize();
 	
-	requestAnimationFrame(drawPlayground);
+	drawPlayground();
+}
+
+function getBlockCanvas(blockField) {
+	
+	var blockCanvas = document.createElement("canvas");
+	var blockContext = blockCanvas.getContext("2d");
+	var sprite = spriteMap["Z"];
+	var block = blocks[blockField.key];
+	blockCanvas.width = block.size[0]*tileSize;
+	blockCanvas.height = block.size[1]*tileSize;
+	blockContext.fillStyle = "rgba(0, 0, 200, 0.5)";
+	blockContext.clearRect(0, 0, blockCanvas.width, blockCanvas.height);
+		
+	blockContext.drawImage(sprite.drawing, 0, 0, 16, 16, 
+		0, 
+		0, 
+		16, 
+		16);
+	blockContext.drawImage(sprite.drawing, 16, 0, 1, 16, 
+		16, 
+		0, 
+		(block.size[0]-1)*32, 
+		16);
+	blockContext.drawImage(sprite.drawing, 48, 0, 16, 16, 
+		((block.size[0]-1)*32)+16, 
+		0, 
+		16, 
+		16);
+	// middle
+	// if (block.size[1] > 2) {
+		
+		blockContext.drawImage(sprite.drawing, 0, 16, 16, 1, 
+			0, 
+			16, 
+			16, 
+			(block.size[1]-1)*32);
+		blockContext.drawImage(sprite.drawing, 16, 16, 1, 1, 
+			16, 
+			16, 
+			(block.size[0]-1)*32, 
+			(block.size[1]-1)*32);
+		blockContext.drawImage(sprite.drawing, 48, 16, 16, 1, 
+			((block.size[0]-1)*32)+16, 
+			16, 
+			16, 
+			(block.size[1]-1)*32);
+	// }
+	// bottom
+	blockContext.drawImage(sprite.drawing, 0, 48, 16, 16, 
+		0, 
+		((block.size[1]-1)*32)+16, 
+		16, 
+		16);
+	blockContext.drawImage(sprite.drawing, 16, 48, 1, 16, 
+		16, 
+		((block.size[1]-1)*32)+16, 
+		(block.size[0]-1)*32, 
+		16);
+	blockContext.drawImage(sprite.drawing, 48, 48, 16, 16, 
+		((block.size[0]-1)*32)+16, 
+		((block.size[1]-1)*32)+16, 
+		16, 
+		16);
+
+	return blockCanvas;
 }
 
 function drawPlayground() {
 	
+	gameLoop = requestAnimationFrame(drawPlayground);
 	animate();
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
 	// draw background
@@ -876,57 +944,7 @@ function drawPlayground() {
 							var startX = block.pos[0]*tileSize;
 							var startY = block.pos[1]*tileSize;
 							// top
-						
-							context.drawImage(sprite.drawing, 0, 0, 16, 16, 
-								startX+block.offsetX, 
-								startY+block.offsetY, 
-								16, 
-								16);
-							context.drawImage(sprite.drawing, 16, 0, 1, 16, 
-								startX+16+block.offsetX, 
-								startY+block.offsetY, 
-								(block.size[0]-1)*32, 
-								16);
-							context.drawImage(sprite.drawing, 48, 0, 16, 16, 
-								startX+((block.size[0]-1)*32)+16+block.offsetX, 
-								startY+block.offsetY, 
-								16, 
-								16);
-							// middle
-							//if (block.size[1] > 1) {
-								
-								context.drawImage(sprite.drawing, 0, 16, 16, 1, 
-									startX+block.offsetX, 
-									startY+16+block.offsetY, 
-									16, 
-									(block.size[1]-1)*32);
-								context.drawImage(sprite.drawing, 16, 16, 1, 1, 
-									startX+16+block.offsetX, 
-									startY+16+block.offsetY, 
-									(block.size[0]-1)*32, 
-									(block.size[1]-1)*32);
-								context.drawImage(sprite.drawing, 48, 16, 16, 1, 
-									startX+((block.size[0]-1)*32)+16+block.offsetX, 
-									startY+16+block.offsetY, 
-									16, 
-									(block.size[1]-1)*32);
-							//}
-							// bottom
-							context.drawImage(sprite.drawing, 0, 48, 16, 16, 
-								startX+block.offsetX, 
-								startY+((block.size[1]-1)*32)+16+block.offsetY, 
-								16, 
-								16);
-							context.drawImage(sprite.drawing, 16, 48, 1, 16, 
-								startX+16+block.offsetX, 
-								startY+((block.size[1]-1)*32)+16+block.offsetY, 
-								(block.size[0]-1)*32, 
-								16);
-							context.drawImage(sprite.drawing, 48, 48, 16, 16, 
-								startX+((block.size[0]-1)*32)+16+block.offsetX, 
-								startY+((block.size[1]-1)*32)+16+block.offsetY, 
-								16, 
-								16);
+							context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 						}
 					}
 					// all others
@@ -955,7 +973,6 @@ function drawPlayground() {
 		}
 	}
 	updateCollisionMaps();
-	requestAnimationFrame(drawPlayground);
 }
 
 function animate() {
@@ -1380,7 +1397,7 @@ function checkPlayerCanMove(direction) {
 				else {
 					
 					levelNr++;
-					clearInterval(gameLoop);
+					cancelAnimationFrame(gameLoop);
 					window.location.hash = "level"+levelNr;
 					window.location.reload();
 				}
@@ -1587,7 +1604,10 @@ $(document).ready(function() {
 		}
 		else {
 			
-			loadLevel(levels[levelNr]);
+			$("body").html("");
+			setTimeout(function() {
+				loadLevel(levels[levelNr]);
+			}, 1000);
 		}
 	}
 	else {
