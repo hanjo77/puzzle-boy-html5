@@ -71,407 +71,7 @@ var bgKeys = "123 ";
 
 var playerIndexes = [];
 
-var levels = ["111111111111111111\n"
-			+ "1   1        1   1\n"
-			+ "1 2   l 11 n   0 1\n"
-			+ "1   1        1   1\n"
-			+ "111111111111111111",
-
-			  "1111111111111111\n"
-			+ "1   1  AA  1   1\n"
-			+ "1 2    BB    0 1\n"
-			+ "1   1  CC  1   1\n"
-			+ "1111111111111111",
-			
-			  "11111111111111\n"
-			+ "11111    1   1\n"
-			+ "11111      0 1\n"
-			+ "11111  AA1   1\n"
-			+ "1   1e AA11111\n"
-			+ "1 2      11111\n"
-			+ "1   1    11111\n"
-			+ "11111111111111",
-						
-			  "111111111111111111\n"
-			+ "11111333     11111\n"
-			+ "1   13333 AA 1   1\n"
-			+ "1 2   333 AA   0 1\n"
-			+ "1   13333 AA 1   1\n"
-			+ "11111333     11111\n"
-			+ "111111111111111111",
-									
-			  "1111111111111111\n"
-			+ "11111      11111\n"
-			+ "1   1      1   1\n"
-			+ "1 2 3  iA    0 1\n"
-			+ "1   1      1   1\n"
-			+ "11111      11111\n"
-			+ "1111111111111111",
-									
-			  "111111111111111\n"
-			+ "1   1 1 1 1   1\n"
-			+ "1   1     1 0 1\n"
-			+ "1   3  1  A   1\n"
-			+ "1 2 1     1 * 1\n"
-			+ "1   1 1 1 1   1\n"
-			+ "111111111111111",
-									
-			  "111111111111111\n"
-			+ "11111     11111\n"
-			+ "1     i d     1\n"
-			+ "1             1\n"
-			+ "1 2  o  d   0 1\n"
-			+ "1             1\n"
-			+ "1     i d     1\n"
-			+ "11111     11111\n"
-			+ "111111111111111",
-									
-			  "11111111111111111\n"
-			+ "1111    D    1111\n"
-			+ "1111    D    1111\n"
-			+ "1111A BCDFG H1111\n"
-			+ "1   A BCDFG H   1\n"
-			+ "1 2 A B E G H 0 1\n"
-			+ "1   A B E G H   1\n"
-			+ "1111  B   G  1111\n"
-			+ "11111111111111111",
-									
-			  "1111111111111111111\n"
-			+ "1      1 A 1      1\n"
-			+ "1      1   1      1\n"
-			+ "1        h C      1\n"
-			+ "1   2  i   D   0  1\n"
-			+ "1        g E      1\n"
-			+ "1      1   1      1\n"
-			+ "1      1 B 1      1\n"
-			+ "1111111111111111111",
-									
-			  "1111111111111111\n"
-			+ "1              1\n"
-			+ "1     h e    0 1\n"
-			+ "1      g       1\n"
-			+ "1        e     1\n"
-			+ "1 2   g f    * 1\n"
-			+ "1              1\n"
-			+ "1111111111111111",
-
-			  "11111111111\n"
-			+ "1111   1111\n"
-			+ "111     111\n"
-			+ "111 f   111\n"
-			+ "11   0   11\n"
-			+ "11    h  11\n"
-			+ "1  g   f  1\n"
-			+ "1    1    1\n"
-			+ "1 m     m 1\n"
-			+ "1   AAA   1\n"
-			+ "11111 11111\n"
-			+ "111     111\n"
-			+ "1111 2 1111\n"
-			+ "1111   1111\n"
-			+ "11111111111",
-
-			  "11111111111111111\n"
-			+ "1 0  1     A    1\n"
-			+ "1    1    11111 1\n"
-			+ "1111 1 Bl   111 1\n"
-			+ "1    1        1 1\n"
-			+ "1 CCC111113  11 1\n"
-			+ "1             1 1\n"
-			+ "1 DE   1 1 FFF1 1\n"
-			+ "1 DE     1      1\n"
-			+ "1 D3 133   13 1 1\n"
-			+ "1    1333  13 1 1\n"
-			+ "1111113333  G 1 1\n"
-			+ "1    133 3  G 1 1\n"
-			+ "1    1333 1 G 1 1\n"
-			+ "1    133331 G 1 1\n"
-			+ "1 2  133331 G 1 1\n"
-			+ "1      3331     1\n"
-			+ "11111111111111111",
-
-			  "1111111111111\n"
-			+ "1  1 3A31   1\n"
-			+ "1  1  A 1   1\n"
-			+ "1  1 BA  1  1\n"
-			+ "1  1     1  1\n"
-			+ "1  1331 C   1\n"
-			+ "12  3333CDD01\n"
-			+ "1  1331 C   1\n"
-			+ "1  1     1  1\n"
-			+ "1  1 EF  1  1\n"
-			+ "1  1  F 1   1\n"
-			+ "1  1 3F31   1\n"
-			+ "1111111111111",
-
-			  "1111111111111111\n"
-			+ "1   1      13331\n"
-			+ "1 AA1 0    1   1\n"
-			+ "1   3   BBB1CC 1\n"
-			+ "11113   BBB1CC 1\n"
-			+ "1 DD33  33313331\n"
-			+ "1 DD333 33     1\n"
-			+ "1 DD333        1\n"
-			+ "1   333   333E 1\n"
-			+ "1   1      33E 1\n"
-			+ "1   1      33E 1\n"
-			+ "111113     11111\n"
-			+ "1    3   33  G 1\n"
-			+ "1 FFF311133  G 1\n"
-			+ "1     1233     1\n"
-			+ "1111111111111111",
-
-			  "111111111111111111\n"
-			+ "111111   111   111\n"
-			+ "1   11 m     1   1\n"
-			+ "1 0      1 g 1 o 1\n"
-			+ "1   1111     A   1\n"
-			+ "11111111 1 11111 1\n"
-			+ "111111   1    11 1\n"
-			+ "111111 e 1 l     1\n"
-			+ "111111        o 11\n"
-			+ "1   11 1 111    11\n"
-			+ "1 2 3     11111111\n"
-			+ "1   111   11111111\n"
-			+ "111111111111111111",
-
-			  "11111111111111111111\n"
-			+ "11111111    11111111\n"
-			+ "1111111     11111111\n"
-			+ "1111111 A 3 11111111\n"
-			+ "1111111 A 3      111\n"
-			+ "1    33 A11C       1\n"
-			+ "1 2 1333AB CDDDE 0 1\n"
-			+ "1    33 F11C   E   1\n"
-			+ "1111111 F 3      111\n"
-			+ "1111111 F   11111111\n"
-			+ "1111111 F   11111111\n"
-			+ "11111111    11111111\n"
-			+ "11111111111111111111",
-
-			  "11111111111111\n"
-			+ "1     11 g g 1\n"
-			+ "1   k 1      1\n"
-			+ "1    A1B     1\n"
-			+ "11   A B 11 C1\n"
-			+ "1  l A1B     1\n"
-			+ "1     1     31\n"
-			+ "1    11111 h31\n"
-			+ "1 DD 01233   1\n"
-			+ "1    1111    1\n"
-			+ "1     1      1\n"
-			+ "1  l E1F     1\n"
-			+ "1    E F G1 H1\n"
-			+ "11   E1F     1\n"
-			+ "1   m 1      1\n"
-			+ "1  3  11 h h 1\n"
-			+ "11111111111111",
-
-			  "11111111111111111111\n"
-			+ "1         AAAA     1\n"
-			+ "1   11111 1111 1   1\n"
-			+ "1   1  33313 B 1   1\n"
-			+ "1   1  33113 CD1   1\n"
-			+ "1   1  33333 C 1   1\n"
-			+ "1   1  33333 C 1   1\n"
-			+ "1   1  33333 O 1   1\n"
-			+ "1   1EE313331F11   1\n"
-			+ "1   1   1 GH1  1   1\n"
-			+ "1   1   1 G 1  1   1\n"
-			+ "1   1  I1  J K 1   1\n"
-			+ "1 2 1   1 L MN 1 0 1\n"
-			+ "1   1   1    N 1   1\n"
-			+ "11111111111111111111",
-
-			  "111111111111111\n"
-			+ "1  2 1111111111\n"
-			+ "1    1111111111\n"
-			+ "111  11 A 11111\n"
-			+ "11  11  A  1111\n"
-			+ "13311 BBB g 111\n"
-			+ "1CC3DD EE    11\n"
-			+ "11 FDD  GGHH 11\n"
-			+ "111 DDf  I    1\n"
-			+ "1111 J  KK  1 1\n"
-			+ "1111  1   L11*1\n"
-			+ "1111  111ML1111\n"
-			+ "11111N111  1111\n"
-			+ "11111 1111  111\n"
-			+ "1111  11111 111\n"
-			+ "1111 111111 111\n"
-			+ "111# 11110  111\n"
-			+ "111111111111111",
-
-			  "11111111111111111111\n"
-			+ "11       0        11\n"
-			+ "1  AABB CCDD EEFF  1\n"
-			+ "1  AABB CCDD EEFF  1\n"
-			+ "1 h  G HHIIJJ K  e 1\n"
-			+ "11   G   II   K   11\n"
-			+ "11  LL        MM  11\n"
-			+ "1 f LL NNOOPP MM g 1\n"
-			+ "1    QQ  OO  RR    1\n"
-			+ "11   QQ SSTT RR   11\n"
-			+ "11  UU  SSTT  VV  11\n"
-			+ "11  UU        VV  11\n"
-			+ "111111111 1111111111\n"
-			+ "1                  1\n"
-			+ "1        2         1\n"
-			+ "11                11\n"
-			+ "11111111111111111111",
-
-			  "1111111111\n"
-			+ "1        1\n"
-			+ "1 0 AA   1\n"
-			+ "1        1\n"
-			+ "11  111  1\n"
-			+ "1 BBBCCC 1\n"
-			+ "1        1\n"
-			+ "1  11    1\n"
-			+ "1  1233  1\n"
-			+ "1111111111",
-
-			  "11111111111111111111\n"
-			+ "1    11111111      1\n"
-			+ "1       AA         1\n"
-			+ "1    11111111      1\n"
-			+ "111111111111 f    g1\n"
-			+ "1  BB3333333   CCC 1\n"
-			+ "12 DD3333333   CCC01\n"
-			+ "1  EE3333333   CCC 1\n"
-			+ "1111111111111      1\n"
-			+ "1    1111111 e    h1\n"
-			+ "1       FF         1\n"
-			+ "1    1111111       1\n"
-			+ "11111111111111111111",
-
-			  "11111111111111111\n"
-			+ "11      1  AAA 11\n"
-			+ "1       1       1\n"
-			+ "1       13  B1  1\n"
-			+ "1       131CC1  1\n"
-			+ "1   2     1 31 01\n"
-			+ "1       13  1   1\n"
-			+ "1       13    D 1\n"
-			+ "1       1 3   D 1\n"
-			+ "11      1 EEE F11\n"
-			+ "11111111111111111",
-
-			  "11111111111111111\n"
-			+ "113  A   c     01\n"
-			+ "11 1b BB  C h  11\n"
-			+ "11 3 D   g   f 11\n"
-			+ "11 33  33 3cE  11\n"
-			+ "11 333   3  EF 11\n"
-			+ "11GG3   3HH E d11\n"
-			+ "11 b 1 3 HH  I 11\n"
-			+ "11 J  K 3   31 11\n"
-			+ "11 J f  f  h33 11\n"
-			+ "11           L 11\n"
-			+ "111  1     M LN11\n"
-			+ "1133311 h OM dN11\n"
-			+ "113 11    PP QN11\n"
-			+ "1233 1  e 3R  311\n"
-			+ "11111111111111111",
-
-			  "11111111111111111111\n"
-			+ "111   f         1111\n"
-			+ "111f    f a a g 1111\n"
-			+ "111   A         1111\n"
-			+ "11   BB   l      111\n"
-			+ "11 CCBB h     e D111\n"
-			+ "11 CC E F   h  G 111\n"
-			+ "12   1 HI n  b J  01\n"
-			+ "11 KK L M   g  N 111\n"
-			+ "11 KKOO g     f P111\n"
-			+ "11   OO   l      111\n"
-			+ "111   Q         1111\n"
-			+ "111e    e c c h 1111\n"
-			+ "111   e         1111\n"
-			+ "11111111111111111111",
-
-			  "111111111111111\n"
-			+ "1111111111  111\n"
-			+ "110  A  BB33111\n"
-			+ "11 a     1 C111\n"
-			+ "11 d f 1  1 111\n"
-			+ "11  D  1EFFF111\n"
-			+ "11G 3 HH  3 111\n"
-			+ "11    1    3  1\n"
-			+ "11333   133 1 1\n"
-			+ "11   III1 1   1\n"
-			+ "11 k III   3111\n"
-			+ "11    111 m 111\n"
-			+ "1  J1 1     111\n"
-			+ "1     3 1 1 111\n"
-			+ "111111111 1 111\n"
-			+ "112 3   3  3111\n"
-			+ "111111111111111",
-
-			  "11111111111111111111\n"
-			+ "1                  1\n"
-			+ "1   111111111111   1\n"
-			+ "1   11111  11111   1\n"
-			+ "1   11  A   B011   1\n"
-			+ "1   11    a  C11   1\n"
-			+ "1   11 n D    11   1\n"
-			+ "1   1   1 d h  1   1\n"
-			+ "1   1  11   E3 1   1\n"
-			+ "1   11     11 11   1\n"
-			+ "1   113   1 F 11   1\n"
-			+ "1   113a G3   11   1\n"
-			+ "1   11311  11111   1\n"
-			+ "1   113111111111   1\n"
-			+ "1   113111111111   1\n"
-			+ "1 2                1\n"
-			+ "1                  1\n"
-			+ "11111111111111111111",
-
-			  "111111111111111111\n"
-			+ "11 11111  11 1   1\n"
-			+ "1   A   f C  3   1\n"
-			+ "1   A  B  C  1   1\n"
-			+ "1   A  B  C  1   1\n"
-			+ "1   A  B  C  1   1\n"
-			+ "1  0A *B #C $1   1\n"
-			+ "1   A  B  C  1   1\n"
-			+ "1   A  B  C  1   1\n"
-			+ "1 E A  B  C  1   1\n"
-			+ "1    e B   e 1 2 1\n"
-			+ "111 1  1111  1   1\n"
-			+ "111111111111111111",
-
-			  "111111111111111111\n"
-			+ "1113A BB    11 C01\n"
-			+ "111D  BB  a   EEF1\n"
-			+ "111   GG   33 EE 1\n"
-			+ "111 g 111 nH1  f 1\n"
-			+ "111    11   II3  1\n"
-			+ "111 m     J    K 1\n"
-			+ "111   1 11311L K 1\n"
-			+ "1113M      33    1\n"
-			+ "1111 111 111 3 1 1\n"
-			+ "111  13  111N3 331\n"
-			+ "111 OOP 111   1  1\n"
-			+ "1133OO3     3  Q31\n"
-			+ "1  311111111111111\n"
-			+ "12 111111111111111\n"
-			+ "111111111111111111",
-
-			  "11111111111111111111\n"
-			+ "1333333333133A B 111\n"
-			+ "13333333131 C  D 111\n"
-			+ "13331333331 C EE 111\n"
-			+ "1333313333FGGG H I 1\n"
-			+ "1231333333 JJ  H 0 1\n"
-			+ "1333313333KLLL H M 1\n"
-			+ "13331333331 N OO 111\n"
-			+ "13333333131 N  P 111\n"
-			+ "1333333333133Q R 111\n"
-			+ "11111111111111111111",
-];
-
-var levelNr = 0;
+var levelNr = 1;
 
 
 /*
@@ -855,7 +455,7 @@ function getImages(obj, className, catName) {
 	}
 }
 
-function loadLevel(level) {
+function drawLevel(level) {
 	
 	players = [];
 	player = {};
@@ -864,30 +464,30 @@ function loadLevel(level) {
 	levelArray = [];
 	undoSteps = [];
 	playerIndexes = [];
-	
+
 	var levelRows = level.split("\n");
-	
+
 	fieldSize[1] = levelRows.length*tileSize;
 	for (var row = 0; row < levelRows.length; row++) {
-		
+	
 		var levelRow = [];
 		var rawLevelRow = [];
 		var rowString = levelRows[row];
 		if (rowString.length > fieldSize[0]) {
-			
+		
 			fieldSize[0] = rowString.length*tileSize;
 		}
 		for (var col = 0; col < rowString.length; col++) {
-			
+		
 			var char = rowString.charAt(col);
 			if (spriteMap[char]) {
-				
+			
 				if (playerKeys.indexOf(char) < 0) {
-				
+			
 					rawLevelRow.push(char);
 				}
 				else {
-				
+			
 					rawLevelRow.push(" ");
 					playerIndexes.push(char);
 					var tmpPlayer = {
@@ -902,7 +502,7 @@ function loadLevel(level) {
 					};
 					players.push(tmpPlayer);
 					if (char == "0") {
-						
+					
 						player = tmpPlayer;
 						currentPlayer = players.length-1;
 					}
@@ -914,7 +514,7 @@ function loadLevel(level) {
 				});
 			}
 			else {
-			
+		
 				rawLevelRow.push(" ");
 				var blockField = {
 					"sprite": spriteMap["Z"],
@@ -923,18 +523,18 @@ function loadLevel(level) {
 					"key": char
 				};
 				if (!blocks[char]) {
-				
+			
 					var width = 0;
 					var height = 0;
 					var tmpRow = row;
 					var tmpCol = col;
 					while (levelRows[tmpRow] && levelRows[tmpRow].charAt(tmpCol) == char) {
-						
+					
 						height++;
 						tmpRow++;
 					}
 					while (rowString.charAt(tmpCol) == char) {
-						
+					
 						width++;
 						tmpCol++;
 					}
@@ -953,18 +553,29 @@ function loadLevel(level) {
 		levelMap.push(levelRow);
 		levelArray.push(rawLevelRow);
 	}
-	
+
 	$("body").html('<canvas id="playground"></canvas>');
 	canvas = $("#playground").get(0);
 	canvas.width = fieldSize[0];
 	canvas.height = fieldSize[1];
 	context = canvas.getContext("2d");
-	
+
 	updateCollisionMaps();
 	resize();
-	
+
 	backgroundCanvas = drawBackground();
 	drawPlayground();
+}
+
+function loadLevel(levelId) {
+	
+	$.getJSON( "level.php?id=" + levelId, function(level) {
+
+		setTimeout(function() {
+			
+			drawLevel(level.data);
+		}, 1000);
+	});
 }
 
 function drawBackground() {
@@ -1761,22 +1372,13 @@ $(document).ready(function() {
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
 	if (!isNaN(levelNr)) {
 		
-		if (levelNr >= levels.length) {
-			
-			window.location.hash = "";
-			levelNr = 0;
-		}
-		else {
-			
-			$("body").html("");
-			setTimeout(function() {
-				loadLevel(levels[levelNr]);
-			}, 1000);
-		}
+		$("body").html("");
+		loadLevel(levelNr);
 	}
 	else {
 		
-		levelNr = 0;
+		window.location.hash = "";
+		levelNr = 1;
 	}
 	resize();
 });

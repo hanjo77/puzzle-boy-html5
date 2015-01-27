@@ -49,7 +49,14 @@ class Level {
 			." inner join `difficulty` `d` on `lo`.`difficulty_id` = `d`.`id`"
 			.$id_condition
 			." order by `d`.`id`, `lo`.`number`";
-		return json_encode($db_util->query($query));
+		if ($id > 0) {
+			
+			return json_encode($db_util->query($query)[0]);
+		}
+		else {
+			
+			return json_encode($db_util->query($query));
+		}
 	}
 }
 

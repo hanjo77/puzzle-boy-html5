@@ -8,6 +8,6 @@
 		<script src="js/puzzle-boy.js"></script>
 	</head>
 	<body>
-		<a href="#level0" onclick="loadLevel(levels[0])" id="title"><img src="img/title.png" /></a>
+		<a href="#level1" onclick="loadLevel(1)" id="title"><img src="img/title.png" /></a>
 	</body>
 </html>
