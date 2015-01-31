@@ -1,4 +1,6 @@
-var canvas, context, bgSprite, sprites, levelMap, blocks, levelArray, players, player, undoSteps, gameLoop, dragStartPos, backgroundCanvas;
+var canvas, context, bgSprite, sprites, levelMap, blocks, rotators, 
+levelArray, players, player, undoSteps, gameLoop, dragStartPos, 
+backgroundCanvas, isGoingBack, wasFilled;
 
 var currentPlayer = 0;
 
@@ -86,39 +88,39 @@ var levelNr = 1;
 
 var sprites = {
 		
-	"player-potatoe": {
+	"player-potato": {
 		
 		"up": [
 			{
-				"url": "player-potatoe-up-1.png",
+				"url": "player-potato-up-1.png",
 			},
 			{
-				"url": "player-potatoe-up-2.png",
+				"url": "player-potato-up-2.png",
 			}
 		],
 		"right": [
 			{
-				"url": "player-potatoe-right-1.png",
+				"url": "player-potato-right-1.png",
 			},
 			{
-				"url": "player-potatoe-right-2.png",
+				"url": "player-potato-right-2.png",
 			}
 		],
 		"down": [
 			{
 				"index": "0",
-				"url": "player-potatoe-down-1.png",
+				"url": "player-potato-down-1.png",
 			},
 			{
-				"url": "player-potatoe-down-2.png",
+				"url": "player-potato-down-2.png",
 			}
 		],
 		"left": [
 			{
-				"url": "player-potatoe-left-1.png",
+				"url": "player-potato-left-1.png",
 			},
 			{
-				"url": "player-potatoe-left-2.png",
+				"url": "player-potato-left-2.png",
 			}
 		]
 	},
@@ -461,6 +463,7 @@ function drawLevel(level) {
 	player = {};
 	levelMap = [];
 	blocks = {};
+	rotators = [];
 	levelArray = [];
 	undoSteps = [];
 	playerIndexes = [];
@@ -918,7 +921,7 @@ function animate() {
 		
 		if (oldPos[0] != player.pos[0] || oldPos[1] != player.pos[1]) {
 		
-			levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
+			// levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
 			oldPos = [player.pos[0], player.pos[1]];
 		}
 		
@@ -927,6 +930,7 @@ function animate() {
 
 function checkPlayerCanMove(direction) {
 
+	var undoMove = [];
 	var canPass = true;
 	var tmpGoal = [player.goal[0], player.goal[1]];
 	if (direction) {
@@ -1058,7 +1062,8 @@ function checkPlayerCanMove(direction) {
 										for (var c = 0; c < currentSprite.collisions.length; c++) {
 										
 											if ((currentSprite.collisions[c].collider != centerField) &&
-												(currentSprite.collisions[c].key == "+" || 												currentSprite.collisions[c].key == "-")) {
+												(currentSprite.collisions[c].key == "+" || 
+												currentSprite.collisions[c].key == "-")) {
 											
 												canPass = false;
 											}
@@ -1122,6 +1127,15 @@ function checkPlayerCanMove(direction) {
 							if (centerField.rotation.angle != 0) {
 								
 								centerField.rotation.direction = rotDirection;
+								undoMove.push({
+			
+									"tile": centerField,
+									"rotation": {
+										"goal": centerField.rotation.goal * -1,
+										"current": 0,
+										"direction": (rotDirection * -1)
+									}
+								});
 							}
 						}
 					}
@@ -1239,6 +1253,13 @@ function checkPlayerCanMove(direction) {
 					}
 					if (canPass) {
 						
+						undoMove.push({
+							
+							"key": goalField.key,
+							"pos": [block.goal[0], block.goal[1]],
+							"goal": [block.pos[0], block.pos[1]],
+							"direction": rotations[(rotationIndexByKey(direction.key)+2)%rotations.length]
+						});
 						block.goal = newPos;
 						block.direction = direction;
 					}
@@ -1255,19 +1276,29 @@ function checkPlayerCanMove(direction) {
 			}
 		}
 	}
-	if (canPass) {
+	if (!isGoingBack && canPass && (player.goal[0] != tmpGoal[0] || player.goal[1] != tmpGoal[1])) {
 		
+		undoMove.push({
+			
+			"playerIndex": currentPlayer,
+			"tile": player,
+			"goal": [player.pos[0], player.pos[1]],
+			"direction": rotations[(rotationIndexByKey(player.direction.key)+2)%rotations.length]
+		});
 		player.goal = tmpGoal;
+		undoSteps.push(undoMove);
 	}
 	else {
 		
 		player.goal = player.pos;
 	}
+	console.log(undoSteps);
 }
 
 
 function updateBlocks() {
 
+	var undo = [];
 	for (var row = 0; row < levelMap.length; row++) {
 		
 		var levelRow = levelMap[row];
@@ -1309,6 +1340,11 @@ function updateBlocks() {
 			
 				for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
 
+					undoSteps[undoSteps.length-1].push({
+						"sprite": spriteMap["3"],
+						"col": col,
+						"row": row
+					});
 					var sprite = spriteMap[" "];
 					delete(levelMap[row][col].key);
 					levelArray[row][col] = " ";
@@ -1324,9 +1360,11 @@ function updateBlocks() {
 					backgroundCanvas.getContext("2d").drawImage(sprite.drawing, pos[0], pos[1]);
 				}
 			}
-			delete(blocks[elem]);
+			blocks[elem].pos = [-100, -100];
+			blocks[elem].goal = blocks[elem].pos;
 		}
 	}
+	return undo;
 }
 
 function updateCollisionMaps() {
@@ -1365,6 +1403,52 @@ function switchPlayers() {
 
 	currentPlayer = (currentPlayer+1)%players.length;
 	player = players[currentPlayer];
+}
+
+function goBack() {
+	
+	if (undoSteps.length > 0) {
+		
+		var undoStep = undoSteps.pop();
+		for (var i = 0; i < undoStep.length; i++) {
+		
+			var undo = undoStep[i];
+			if (undo.goal) {
+			
+				if (undo.playerIndex > -1) {
+					
+					currentPlayer = undo.playerIndex;
+					player = players[currentPlayer];
+					undo.tile.goal = undo.goal;
+					undo.tile.direction = undo.direction;
+				}
+				else if (undo.key && blocks[undo.key]) {
+					
+					var block = blocks[undo.key];
+					block.pos = undo.pos;
+					block.goal = undo.goal;
+					block.direction = undo.direction;
+				}
+			}
+			else if (undo.rotation) {
+			
+				undo.tile.rotation = undo.rotation;
+			}
+			else {
+				
+				levelMap[undo.row][undo.col] = undo;
+				levelArray[undo.row][undo.col] = "3";
+				var pos = [
+					((tileSize / 2)+(undo.col*tileSize))-(tileSize/2), 
+					((tileSize / 2)+(undo.row*tileSize))-(tileSize/2)
+				];
+				backgroundCanvas.getContext("2d").drawImage(undo.sprite.drawing, pos[0], pos[1]);
+			}
+		}
+		console.log(levelMap);
+		isGoingBack = true;
+		handlePlayerMovement();
+	}
 }
 
 $(document).ready(function() {
@@ -1425,7 +1509,8 @@ document.addEventListener('touchstart', function(e) {
 		e.preventDefault();
 		if (e.touches.length > 1) {
 		
-			switchPlayers()
+			switchPlayers();
+			goBack();
 		}
 		else {
 		
@@ -1483,6 +1568,8 @@ $(document).keydown(function(e) {
 
 	if (player && !player.direction) {
 		
+		isGoingBack = false;
+		console.log(e.keyCode);
 		switch(e.keyCode) {
 		
 		case 37: // left
@@ -1500,23 +1587,42 @@ $(document).keydown(function(e) {
 		case 40: // down
 			player.direction = rotations[2];
 			break;
+		}
+		checkPlayerCanMove(player.direction);
+		handlePlayerMovement();
+	}
+});
+
+$(document).keyup(function(e) {
+
+	if (player && !player.direction) {
+		
+		switch(e.keyCode) {
 
 		case 16: // shift
 			switchPlayers();
 			break;
+
+		case 93: //8: // backspace
+			e.preventDefault();
+			goBack();
+			break;
 		}
-		handlePlayerMovement();
 	}
 });
 
 function handlePlayerMovement() {
 	
-	checkPlayerCanMove(player.direction);
 	if (player && player.sprite) {
 		
 		if (player.direction) {
 	
 			var sprite = sprites[player.sprite.spriteClass][player.direction.key][0];
+			if (isGoingBack) {
+				
+				var direction = rotations[(rotationIndexByKey(player.direction.key)+2)%rotations.length].key
+				sprite = sprites[player.sprite.spriteClass][direction][0];
+			}
 			sprite.index = playerIndexes[currentPlayer];
 			player.sprite = sprite;
 			players[currentPlayer].sprite = sprite;

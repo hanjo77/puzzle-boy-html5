@@ -20,7 +20,7 @@ SET time_zone = "+00:00";
 -- Datenbank: `puzzle-boy`
 --
 DROP DATABASE IF EXISTS `puzzle-boy`;
-CREATE DATABASE IF NOT EXISTS `puzzle-boy` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_520_ci;
+CREATE DATABASE IF NOT EXISTS `puzzle-boy` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 USE `puzzle-boy`;
 
 -- --------------------------------------------------------
@@ -31,14 +31,14 @@ USE `puzzle-boy`;
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_520_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8_unicode_520_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8_unicode_520_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `active` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_LEVEL_NAME` (`name`),
   UNIQUE KEY `UNIQUE_EMAIL` (`email`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_520_ci AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
 
 --
 -- Daten für Tabelle `user`
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `level` (
   `active` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_LEVEL_CREATOR_USER_ID` (`creator`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_520_ci AUTO_INCREMENT=31 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=31 ;
 
 --
 -- Daten für Tabelle `level`
@@ -106,10 +106,10 @@ INSERT INTO `level` (`id`, `data`, `creator`, `active`) VALUES
 
 CREATE TABLE IF NOT EXISTS `origin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_520_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_ORIGIN_NAME` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_520_ci AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
 
 --
 -- Daten für Tabelle `origin`
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `level_origin` (
   KEY `FK_LEVEL_ORIGIN_LEVEL_ID` (`level_id`),
   KEY `FK_LEVEL_ORIGIN_ORIGIN_ID` (`origin_id`),
   KEY `FK_LEVEL_ORIGIN_DIFFICULTY_ID` (`difficulty_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_520_ci AUTO_INCREMENT=31 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=31 ;
 
 --
 -- Daten für Tabelle `level_origin`
@@ -182,10 +182,10 @@ INSERT INTO `level_origin` (`id`, `level_id`, `origin_id`, `difficulty_id`, `num
 
 CREATE TABLE IF NOT EXISTS `difficulty` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_520_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_DIFFICULTY_NAME` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_520_ci AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
 
 --
 -- Daten für Tabelle `difficulty`
