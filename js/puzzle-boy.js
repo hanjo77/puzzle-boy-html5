@@ -1,10 +1,10 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, rotators, 
 levelArray, players, player, undoSteps, gameLoop, dragStartPos, 
-backgroundCanvas, isGoingBack, wasFilled;
+backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch;
 
 var currentPlayer = 0;
 
-var animSpeed = 10;
+var animSpeed = 3;
 
 var swipeTolerance = 50;
 
@@ -504,11 +504,13 @@ function drawLevel(level) {
 						"spriteIndex": char
 					};
 					players.push(tmpPlayer);
+					playerCount = players.length;
 					if (char == "0") {
 					
 						player = tmpPlayer;
 						currentPlayer = players.length-1;
 					}
+					char = " ";
 				}
 				levelRow.push({
 					"sprite": spriteMap[char],
@@ -699,7 +701,7 @@ function drawPlayground() {
 				];
 				// player sprites
 				var isPlayer = false;
-				for (var i = 0; i < players.length; i++) {
+				for (var i = 0; i < playerCount; i++) {
 					
 					if (sprite.index == players[i].spriteIndex) {
 					
@@ -720,7 +722,7 @@ function drawPlayground() {
 						}
 					}
 					// all others
-					else if (bgKeys.indexOf(sprite.index) == -1) {
+					else if (bgKeys.indexOf(sprite.index) == -1 && playerKeys.indexOf(sprite.index) == -1) {
 					
 						context.save();
 						context.translate(pos[0], pos[1]);
@@ -736,7 +738,7 @@ function drawPlayground() {
 		}
 	}
 	// draw players
-		for (var i = 0; i < players.length; i++) {
+		for (var i = 0; i < playerCount; i++) {
 			
 			var otherPlayer = players[i];
 			if (otherPlayer.sprite) {
@@ -749,182 +751,197 @@ function drawPlayground() {
 
 function animate() {
 
-	for (var row = 0; row < levelMap.length; row++) {
+	if (enteredGoal) {
 		
-		var levelRow = levelMap[row];
-		for (var col = 0; col < levelRow.length; col++) {
+		player.sprite.key++;
+		var index = Math.floor(player.sprite.key/animSpeed);
+		var direction = player.sprite.spriteCat;
+		if (index >= player.sprite.altSprites.length) {
+			
+			player.sprite.key = 0;
+			index = 0;
+			direction = rotations[(rotationIndexByKey(player.sprite.spriteCat)+1)%rotations.length].key;
+		}
+		player.sprite = sprites[player.sprite.spriteClass][direction][index];
+	}
+	else {
 		
-			var sprite = levelRow[col].sprite;
-			var rotation = levelRow[col].rotation;
-			if (rotation && (rotation.current != rotation.goal)) {
+		for (var row = 0; row < levelMap.length; row++) {
 		
-				// get current rotation index
-				var index = rotationIndexByKey(sprite.key);
-				var nextIndex = index + rotation.direction;
-				if (nextIndex < 0) {
+			var levelRow = levelMap[row];
+			for (var col = 0; col < levelRow.length; col++) {
+		
+				var sprite = levelRow[col].sprite;
+				var rotation = levelRow[col].rotation;
+				if (rotation && (rotation.current != rotation.goal)) {
+		
+					// get current rotation index
+					var index = rotationIndexByKey(sprite.key);
+					var nextIndex = index + rotation.direction;
+					if (nextIndex < 0) {
 				
-					nextIndex += rotations.length;
-				}
-				nextIndex = nextIndex % rotations.length;
+						nextIndex += rotations.length;
+					}
+					nextIndex = nextIndex % rotations.length;
 				
-				// rotation clockwise
-				if (rotation.direction > 0) {
+					// rotation clockwise
+					if (rotation.direction > 0) {
 
-					if (rotation.current < rotation.goal) {
+						if (rotation.current < rotation.goal) {
 				
-						rotation.current += rotationSpeed;
-					}
-					else {
-					
-						// increase rotation index
-						index = (index+1)%rotations.length;
-						rotation.current = rotation.goal;
-					}
-				}
-				// rotation counter-clockwise
-				else if (rotation.direction < 0) {
-
-					if (rotation.current > rotation.goal) {
-				
-						rotation.current -= rotationSpeed;
-					}
-					else {
-					
-						// decrease rotation index
-						index--;
-						if (index < 0) {
-						
-							index = rotations.length-1;
+							rotation.current += rotationSpeed;
 						}
-						rotation.current = rotation.goal;
-					}
-				}
-				// reset stuff if index was changed
-				if (nextIndex == index) {
+						else {
 					
-					sprite = sprite.altSprites[rotations[index].key];
-					levelRow[col].rotation = {
-						"current": 0,
-						"goal": 0,
-						"direction": 0
-					};
-					levelRow[col].sprite = sprite;
+							// increase rotation index
+							index = (index+1)%rotations.length;
+							rotation.current = rotation.goal;
+						}
+					}
+					// rotation counter-clockwise
+					else if (rotation.direction < 0) {
+
+						if (rotation.current > rotation.goal) {
+				
+							rotation.current -= rotationSpeed;
+						}
+						else {
+					
+							// decrease rotation index
+							index--;
+							if (index < 0) {
+						
+								index = rotations.length-1;
+							}
+							rotation.current = rotation.goal;
+						}
+					}
+					// reset stuff if index was changed
+					if (nextIndex == index) {
+					
+						sprite = sprite.altSprites[rotations[index].key];
+						levelRow[col].rotation = {
+							"current": 0,
+							"goal": 0,
+							"direction": 0
+						};
+						levelRow[col].sprite = sprite;
+					}
 				}
 			}
 		}
-	}
-	// move blocks
-	for (var elem in blocks) {
+		// move blocks
+		for (var elem in blocks) {
 		
-		var block = blocks[elem];
-		if (block.direction) {
+			var block = blocks[elem];
+			if (block.direction) {
 			
-			switch (block.direction.key) {
+				switch (block.direction.key) {
+		
+					case "up":
+						block.offsetY -= playerSpeed;
+						if (block.offsetY <= (-1*tileSize)) {
+		
+							block.offsetY += tileSize;
+							block.pos[1]--;
+						}
+						break;
+				
+					case "right":
+						block.offsetX += playerSpeed;
+						if (block.offsetX >= tileSize) {
+		
+							block.offsetX -= tileSize;
+							block.pos[0]++;
+						}
+						break;
+				
+					case "down":
+						block.offsetY += playerSpeed;
+						if (block.offsetY >= tileSize) {
+		
+							block.offsetY -= tileSize;
+							block.pos[1]++;
+						}
+						break;
+				
+					case "left":
+						block.offsetX -= playerSpeed;
+						if (block.offsetX <= (-1*tileSize)) {
+		
+							block.offsetX += tileSize;
+							block.pos[0]--;
+						}
+						break;
+				}
+				if ((block.pos[0] == block.goal[0]) && (block.pos[1] == block.goal[1])) {
+		
+					updateBlocks()
+					block.offsetX = 0;
+					block.offsetY = 0;
+					block.direction = null;
+				}			
+			}
+		}
+	
+		// move player
+		if (player && player.direction) {
+	
+			player.animFrame = (player.animFrame+1)%animSpeed;
+			var oldPos = [player.pos[0], player.pos[1]];
+			switch (player.direction.key) {
 		
 				case "up":
-					block.offsetY -= playerSpeed;
-					if (block.offsetY <= (-1*tileSize)) {
+					player.offsetY -= playerSpeed;
+					if (player.offsetY < (-1*tileSize)) {
 		
-						block.offsetY += tileSize;
-						block.pos[1]--;
+						player.offsetY += tileSize;
+						player.pos[1]--;
 					}
 					break;
 				
 				case "right":
-					block.offsetX += playerSpeed;
-					if (block.offsetX >= tileSize) {
+					player.offsetX += playerSpeed;
+					if (player.offsetX > tileSize) {
 		
-						block.offsetX -= tileSize;
-						block.pos[0]++;
+						player.offsetX -= tileSize;
+						player.pos[0]++;
 					}
 					break;
 				
 				case "down":
-					block.offsetY += playerSpeed;
-					if (block.offsetY >= tileSize) {
+					player.offsetY += playerSpeed;
+					if (player.offsetY > tileSize) {
 		
-						block.offsetY -= tileSize;
-						block.pos[1]++;
+						player.offsetY -= tileSize;
+						player.pos[1]++;
 					}
 					break;
 				
 				case "left":
-					block.offsetX -= playerSpeed;
-					if (block.offsetX <= (-1*tileSize)) {
+					player.offsetX -= playerSpeed;
+					if (player.offsetX < (-1*tileSize)) {
 		
-						block.offsetX += tileSize;
-						block.pos[0]--;
+						player.offsetX += tileSize;
+						player.pos[0]--;
 					}
 					break;
 			}
-			if ((block.pos[0] == block.goal[0]) && (block.pos[1] == block.goal[1])) {
 		
-				updateBlocks()
-				block.offsetX = 0;
-				block.offsetY = 0;
-				block.direction = null;
-			}			
+			// goal reached
+			if ((player.pos[0] == player.goal[0]) && (player.pos[1] == player.goal[1])) {
+		
+				player.offsetX = 0;
+				player.offsetY = 0;
+				player.direction = null;
+			}
+		
+			if (oldPos[0] != player.pos[0] || oldPos[1] != player.pos[1]) {
+		
+				// levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
+				oldPos = [player.pos[0], player.pos[1]];
+			}
 		}
-	}
-	
-	// move player
-	if (player && player.direction) {
-	
-		player.animFrame = (player.animFrame+1)%animSpeed;
-		var oldPos = [player.pos[0], player.pos[1]];
-		switch (player.direction.key) {
-		
-			case "up":
-				player.offsetY -= playerSpeed;
-				if (player.offsetY < (-1*tileSize)) {
-		
-					player.offsetY += tileSize;
-					player.pos[1]--;
-				}
-				break;
-				
-			case "right":
-				player.offsetX += playerSpeed;
-				if (player.offsetX > tileSize) {
-		
-					player.offsetX -= tileSize;
-					player.pos[0]++;
-				}
-				break;
-				
-			case "down":
-				player.offsetY += playerSpeed;
-				if (player.offsetY > tileSize) {
-		
-					player.offsetY -= tileSize;
-					player.pos[1]++;
-				}
-				break;
-				
-			case "left":
-				player.offsetX -= playerSpeed;
-				if (player.offsetX < (-1*tileSize)) {
-		
-					player.offsetX += tileSize;
-					player.pos[0]--;
-				}
-				break;
-		}
-		
-		// goal reached
-		if ((player.pos[0] == player.goal[0]) && (player.pos[1] == player.goal[1])) {
-		
-			player.offsetX = 0;
-			player.offsetY = 0;
-			player.direction = null;
-		}
-		
-		if (oldPos[0] != player.pos[0] || oldPos[1] != player.pos[1]) {
-		
-			// levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
-			oldPos = [player.pos[0], player.pos[1]];
-		}
-		
 	}
 }
 
@@ -932,6 +949,7 @@ function checkPlayerCanMove(direction) {
 
 	var undoMove = [];
 	var canPass = true;
+	var restorePlayerOnUndo;
 	var tmpGoal = [player.goal[0], player.goal[1]];
 	if (direction) {
 	
@@ -1164,26 +1182,10 @@ function checkPlayerCanMove(direction) {
 			}
 			else if (goalField.sprite.spriteClass == "goal") {
 			
-				if (players.length > 1) {
-					
-					levelMap[player.pos[1]][player.pos[0]] = {
-						
-						"sprite": spriteMap[" "],
-						"col": player.pos[0],
-						"row": player.pos[1]
-					};
-					players.splice(currentPlayer, 1);
-					currentPlayer = 0;
-					player = players[currentPlayer];
-					tmpGoal = [player.pos[0], player.pos[1]];
-				}
-				else {
-					
-					levelNr++;
-					cancelAnimationFrame(gameLoop);
-					window.location.hash = "level"+levelNr;
-					window.location.reload();
-				}
+				canPass = true;
+				restorePlayerOnUndo = currentPlayer;
+				setTimeout(enterGoal, 500);
+//				enterGoal();
 			}
 			else if (goalField.sprite.spriteClass == "block") {
 				
@@ -1256,7 +1258,7 @@ function checkPlayerCanMove(direction) {
 						undoMove.push({
 							
 							"key": goalField.key,
-							"pos": [block.goal[0], block.goal[1]],
+							"pos": [newPos[0], newPos[1]],
 							"goal": [block.pos[0], block.pos[1]],
 							"direction": rotations[(rotationIndexByKey(direction.key)+2)%rotations.length]
 						});
@@ -1281,7 +1283,9 @@ function checkPlayerCanMove(direction) {
 		undoMove.push({
 			
 			"playerIndex": currentPlayer,
+			"restore": restorePlayerOnUndo,
 			"tile": player,
+			"pos": [tmpGoal[0], tmpGoal[1]],
 			"goal": [player.pos[0], player.pos[1]],
 			"direction": rotations[(rotationIndexByKey(player.direction.key)+2)%rotations.length]
 		});
@@ -1292,9 +1296,39 @@ function checkPlayerCanMove(direction) {
 		
 		player.goal = player.pos;
 	}
-	console.log(undoSteps);
-}
+	}
 
+function enterGoal() {
+	
+	enteredGoal = true;
+	window.setTimeout(function() {
+		
+		if (playerCount > 1) {
+		
+			levelMap[player.pos[1]][player.pos[0]] = {
+			
+				"sprite": spriteMap["2"],
+				"col": player.pos[0],
+				"row": player.pos[1]
+			};
+			playerCount--;
+			
+			players.push(players.splice(currentPlayer, 1)[0]);
+			players[players.length-1].pos = [-100, -100];
+			players[players.length-1].goal = [-100, -100];
+			currentPlayer = 0;
+			player = players[currentPlayer];
+		}
+		else {
+		
+			levelNr++;
+			cancelAnimationFrame(gameLoop);
+			window.location.hash = "level"+levelNr;
+			window.location.reload();
+		}
+		enteredGoal = false;
+	}, 2000);
+}
 
 function updateBlocks() {
 
@@ -1401,7 +1435,7 @@ function updateCollisionMaps() {
 
 function switchPlayers() {
 
-	currentPlayer = (currentPlayer+1)%players.length;
+	currentPlayer = (currentPlayer+1)%playerCount;
 	player = players[currentPlayer];
 }
 
@@ -1417,10 +1451,16 @@ function goBack() {
 			
 				if (undo.playerIndex > -1) {
 					
+					if (undo.restore > -1) {
+						
+						players.splice(undo.playerIndex, 0, players.pop());
+						playerCount++;
+					}
 					currentPlayer = undo.playerIndex;
 					player = players[currentPlayer];
-					undo.tile.goal = undo.goal;
-					undo.tile.direction = undo.direction;
+					player.pos = undo.pos;
+					player.goal = undo.goal;
+					player.direction = undo.direction;
 				}
 				else if (undo.key && blocks[undo.key]) {
 					
@@ -1436,7 +1476,6 @@ function goBack() {
 			}
 			else {
 				
-				levelMap[undo.row][undo.col] = undo;
 				levelArray[undo.row][undo.col] = "3";
 				var pos = [
 					((tileSize / 2)+(undo.col*tileSize))-(tileSize/2), 
@@ -1445,8 +1484,7 @@ function goBack() {
 				backgroundCanvas.getContext("2d").drawImage(undo.sprite.drawing, pos[0], pos[1]);
 			}
 		}
-		console.log(levelMap);
-		isGoingBack = true;
+				isGoingBack = true;
 		handlePlayerMovement();
 	}
 }
@@ -1504,6 +1542,7 @@ function resize() {
 
 document.addEventListener('touchstart', function(e) {
 		
+	firstTouch = new Date();
 	if (canvas) {
 		
 		e.preventDefault();
@@ -1524,9 +1563,13 @@ document.addEventListener('touchend', function(e) {
 		
 	if (canvas) {
 		
+		if (e.touches.length > 2) {
+		
+			window.location.reload();
+		}
 		if (e.touches.length > 1) {
 		
-			switchPlayers()
+			goBack();
 		}
 		else if (dragStartPos) {
 		
@@ -1559,6 +1602,10 @@ document.addEventListener('touchend', function(e) {
 				player.direction = rotations[rotationIndexByKey(direction)];
 				handlePlayerMovement();
 			}
+			else if (new Date()-firstTouch < 500) {
+
+				switchPlayers();
+			}
 			dragStartPos = null;
 		}
 	}
@@ -1566,7 +1613,7 @@ document.addEventListener('touchend', function(e) {
 
 $(document).keydown(function(e) {
 
-	if (player && !player.direction) {
+	if (player && !player.direction && !enteredGoal) {
 		
 		isGoingBack = false;
 		console.log(e.keyCode);
@@ -1595,7 +1642,7 @@ $(document).keydown(function(e) {
 
 $(document).keyup(function(e) {
 
-	if (player && !player.direction) {
+	if (player && !player.direction && !enteredGoal) {
 		
 		switch(e.keyCode) {
 
@@ -1603,9 +1650,13 @@ $(document).keyup(function(e) {
 			switchPlayers();
 			break;
 
-		case 93: //8: // backspace
-			e.preventDefault();
+		case 8: // backspace
+			window.location.hash = "#level" + levelNr;
 			goBack();
+			break;
+
+		case 27: // escape
+			window.location.reload();
 			break;
 		}
 	}
