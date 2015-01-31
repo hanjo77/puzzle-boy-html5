@@ -1542,13 +1542,16 @@ function resize() {
 
 document.addEventListener('touchstart', function(e) {
 		
-	firstTouch = new Date();
+	if (firstTouch != null && new Date()-firstTouch < 300) {
+
+		firstTouch = null;
+		switchPlayers();
+	}
 	if (canvas) {
 		
 		e.preventDefault();
 		if (e.touches.length > 1) {
 		
-			switchPlayers();
 			goBack();
 		}
 		else {
@@ -1563,10 +1566,6 @@ document.addEventListener('touchend', function(e) {
 		
 	if (canvas) {
 		
-		if (e.touches.length > 2) {
-		
-			window.location.reload();
-		}
 		if (e.touches.length > 1) {
 		
 			goBack();
@@ -1599,12 +1598,14 @@ document.addEventListener('touchend', function(e) {
 				}
 			}
 			if (direction != "" && player && !player.direction) {
+				isGoingBack = false;
 				player.direction = rotations[rotationIndexByKey(direction)];
+				checkPlayerCanMove(player.direction);
 				handlePlayerMovement();
 			}
-			else if (new Date()-firstTouch < 500) {
-
-				switchPlayers();
+			else {
+				
+				firstTouch = new Date();
 			}
 			dragStartPos = null;
 		}
