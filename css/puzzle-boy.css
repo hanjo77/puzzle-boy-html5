@@ -34,7 +34,7 @@ canvas {
 	z-index: 1;
 }
 
-.levelFinished {
+.content {
 	
 	box-shadow: 0 0 36px 36px #000;
 	color: #fff;
@@ -47,6 +47,11 @@ canvas {
 table {
 	
 	width: 100%;
+	padding-bottom: 2em;
+}
+
+.buttons {
+	
 	padding-bottom: 1em;
 }
 
@@ -69,7 +74,7 @@ td {
 .potato {
 	
 	right: -6em;
-	top: -5em;
+	top: -3em;
 }
 
 .eggplant {
@@ -88,4 +93,14 @@ td {
 	
 	top: -5.5em;
 	left: 4em;
+}
+
+.buttons a {
+	
+	background-color: #fff;
+	padding: .5em 1em;
+	margin: 0;
+	text-decoration: none;
+	font-weight: bold;
+	color: #000;
 }

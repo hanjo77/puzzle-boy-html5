@@ -1,6 +1,6 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, rotators, 
 levelArray, players, player, undoSteps, gameLoop, dragStartPos, 
-backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration;
+backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime;
 
 var jumpSpeed = 8;
 
@@ -76,6 +76,8 @@ var bgKeys = "123 ";
 var playerIndexes = [];
 
 var levelNr = 1;
+
+var levelString = "";
 
 
 /*
@@ -461,6 +463,7 @@ function getImages(obj, className, catName) {
 
 function drawLevel(level) {
 	
+	levelString = level;
 	players = [];
 	player = {};
 	levelMap = [];
@@ -469,6 +472,7 @@ function drawLevel(level) {
 	levelArray = [];
 	undoSteps = [];
 	playerIndexes = [];
+	fieldSize = [0, 0];
 
 	var levelRows = level.split("\n");
 
@@ -572,10 +576,15 @@ function drawLevel(level) {
 	backgroundCanvas = drawBackground();
 	drawPlayground();
 	isJumping = true;
+	if (!startTime) {
+		
+		startTime = new Date();
+	}
 }
 
 function loadLevel(levelId) {
 	
+	levelNr = levelId;
 	$.getJSON( "level.php?id=" + levelId, function(level) {
 
 		setTimeout(function() {
@@ -1363,13 +1372,41 @@ function enterGoal() {
 		}
 		else {
 		
-			levelNr++;
-			cancelAnimationFrame(gameLoop);
-			window.location.hash = "level"+levelNr;
-			window.location.reload();
+			endLevel();
 		}
 		enteredGoal = false;
 	}, 2000);
+}
+
+function endLevel() {
+	
+	var timeSpent = Math.floor((new Date()-startTime)/1000);
+	startTime = null;
+	var playersQuery = "";
+	for (var i = 0; i < playerKeys.length; i++) {
+		
+		var key = playerKeys[i];
+		if (levelString.indexOf(key) > -1) {
+			
+			playersQuery += "&" + spriteMap[key].spriteClass.replace("player-", "") + "=true";
+		}
+	}
+	cancelAnimationFrame(gameLoop);
+	$.ajax({
+	  url: "level-solved.php?level=" + levelNr + "&time=" + timeSpent + "&moves=" + undoSteps.length + playersQuery,
+	  context: document.body
+	}).done(function(data) {
+		
+		$("body").html(data);
+		$(".btnContinue").click(function() {
+			
+			loadLevel(levelNr+1);
+		});
+		$(".btnRetry").click(function() {
+			
+			loadLevel(levelNr);
+		});
+	});
 }
 
 function updateBlocks() {
