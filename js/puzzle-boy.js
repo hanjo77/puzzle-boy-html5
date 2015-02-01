@@ -681,7 +681,6 @@ function getBlockCanvas(blockField) {
 function drawPlayground() {
 	
 	gameLoop = requestAnimationFrame(drawPlayground);
-	animate();
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
 	// draw background
 	context.drawImage(backgroundCanvas, 0, 0);
@@ -710,18 +709,8 @@ function drawPlayground() {
 				// draw moveable blocks
 				if (!isPlayer) {
 					
-					if (sprite && sprite.spriteClass == "block") {
-				
-						for (var elem in blocks) {
-					
-							var block = blocks[elem];
-							var startX = block.pos[0]*tileSize;
-							var startY = block.pos[1]*tileSize;
-							context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
-						}
-					}
 					// all others
-					else if (bgKeys.indexOf(sprite.index) == -1 && playerKeys.indexOf(sprite.index) == -1) {
+					if (bgKeys.indexOf(sprite.index) == -1 && playerKeys.indexOf(sprite.index) == -1 && sprite.spriteClass != "block") {
 					
 						context.save();
 						context.translate(pos[0], pos[1]);
@@ -736,6 +725,13 @@ function drawPlayground() {
 			}
 		}
 	}
+	for (var elem in blocks) {
+
+		var block = blocks[elem];
+		var startX = block.pos[0]*tileSize;
+		var startY = block.pos[1]*tileSize;
+		context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
+	}
 	// draw players
 		for (var i = 0; i < playerCount; i++) {
 			
@@ -746,6 +742,7 @@ function drawPlayground() {
 		}
 	}
 	updateCollisionMaps();
+	animate();
 }
 
 function animate() {
@@ -874,7 +871,7 @@ function animate() {
 						}
 						break;
 				}
-				if ((block.pos[0] == block.goal[0]) && (block.pos[1] == block.goal[1])) {
+				if (levelMap[oldPos[1]] && levelMap[oldPos[1]][oldPos[0]] && (block.pos[0] == block.goal[0]) && (block.pos[1] == block.goal[1])) {
 		
 					delete(levelMap[oldPos[1]][oldPos[0]].key);
 					levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[levelArray[oldPos[1]][oldPos[0]]];
@@ -1361,23 +1358,30 @@ function updateBlocks() {
 	
 		var block = blocks[elem];
 		var blockFills = true;
-		for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+		if (block.pos[1] >= 0) {
+			
+			for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
 		
-			for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+				for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
 				
-				if (levelArray[row][col] != "3") {
+					if (levelArray[row][col] != "3") {
 				
-					blockFills = false;
-				}
-				levelMap[row][col] = {
-					"sprite": spriteMap["Z"],
-					"col": col,
-					"row": row,
-					"key": elem
+						blockFills = false;
+					}
+					levelMap[row][col] = {
+						"sprite": spriteMap["Z"],
+						"col": col,
+						"row": row,
+						"key": elem
+					}
 				}
 			}
 		}
-		if (blockFills) {
+		else {
+			
+			blockFills = false;
+		}
+		if (blockFills && !isGoingBack) {
 		
 			for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
 			
@@ -1481,8 +1485,11 @@ function goBack() {
 					block.pos = undo.pos;
 					block.goal = undo.goal;
 					block.direction = undo.direction;
-					levelMap[block.pos[1]][block.pos[0]].key = undo.key;
-					levelMap[block.pos[1]][block.pos[0]].sprite = spriteMap["Z"];
+					if (block.pos[0] >= 0) {
+						
+						levelMap[block.pos[1]][block.pos[0]].key = undo.key;
+						levelMap[block.pos[1]][block.pos[0]].sprite = spriteMap["Z"];
+					}
 				}
 			}
 			else if (undo.rotation) {
@@ -1651,6 +1658,10 @@ $(document).keydown(function(e) {
 		case 40: // down
 			player.direction = rotations[2];
 			break;
+			
+		case 8: // backspace
+			e.preventDefault();
+			break;
 		}
 		checkPlayerCanMove(player.direction);
 		handlePlayerMovement();
@@ -1668,7 +1679,7 @@ $(document).keyup(function(e) {
 			break;
 
 		case 8: // backspace
-			window.location.hash = "#level" + levelNr;
+			e.preventDefault();
 			goBack();
 			break;
 
