@@ -571,6 +571,7 @@ function drawLevel(level) {
 
 	backgroundCanvas = drawBackground();
 	drawPlayground();
+	isJumping = true;
 }
 
 function loadLevel(levelId) {
@@ -1358,6 +1359,7 @@ function enterGoal() {
 			players[players.length-1].sprite = sprite;
 			currentPlayer = 0;
 			player = players[currentPlayer];
+			isJumping = true;
 		}
 		else {
 		
@@ -1482,9 +1484,12 @@ function updateCollisionMaps() {
 
 function switchPlayers() {
 
-	currentPlayer = (currentPlayer+1)%playerCount;
-	player = players[currentPlayer];
-	isJumping = true;
+	if (playerCount > 1) {
+		
+		currentPlayer = (currentPlayer+1)%playerCount;
+		player = players[currentPlayer];
+		isJumping = true;
+	}
 }
 
 function goBack() {
