@@ -1,6 +1,8 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, rotators, 
 levelArray, players, player, undoSteps, gameLoop, dragStartPos, 
-backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch;
+backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration;
+
+var jumpSpeed = 8;
 
 var currentPlayer = 0;
 
@@ -733,12 +735,12 @@ function drawPlayground() {
 		context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 	}
 	// draw players
-		for (var i = 0; i < playerCount; i++) {
-			
-			var otherPlayer = players[i];
-			if (otherPlayer.sprite) {
+	for (var i = 0; i < playerCount; i++) {
+		
+		var otherPlayer = players[i];
+		if (otherPlayer.sprite) {
 				
-				context.drawImage(otherPlayer.sprite.altSprites[Math.round(otherPlayer.animFrame/animSpeed)].drawing, (otherPlayer.pos[0]*tileSize)+otherPlayer.offsetX, (otherPlayer.pos[1]*tileSize)+otherPlayer.offsetY);	
+			context.drawImage(otherPlayer.sprite.altSprites[Math.round(otherPlayer.animFrame/animSpeed)].drawing, (otherPlayer.pos[0]*tileSize)+otherPlayer.offsetX, (otherPlayer.pos[1]*tileSize)+otherPlayer.offsetY);	
 		}
 	}
 	updateCollisionMaps();
@@ -747,6 +749,40 @@ function drawPlayground() {
 
 function animate() {
 
+	if (isJumping) {
+		
+		if (jumpAcceleration == 1) {
+			
+			jumpAcceleration *= -1;
+		}
+		else if (jumpAcceleration <= -1*jumpSpeed) {
+			
+			jumpAcceleration = null;
+			isJumping = false;
+			player.offsetX = 0;
+			player.offsetY = 0;
+		}
+		else if (jumpAcceleration > 0) {
+			
+			player.offsetX = 0;
+			player.offsetY -= jumpAcceleration;
+			jumpAcceleration /= 2;
+		}
+		else if (jumpAcceleration < 0) {
+			
+			player.offsetX = 0;
+			player.offsetY -= jumpAcceleration;
+			jumpAcceleration *= 2;
+		}
+		else {
+			
+			jumpAcceleration = jumpSpeed;
+		}
+	}
+	if (!isGoingBack && !enteredGoal && levelArray[player.pos[1]][player.pos[0]] == "2") {
+	
+		enterGoal();
+	}
 	if (enteredGoal) {
 		
 		player.sprite.key++;
@@ -1171,8 +1207,6 @@ function checkPlayerCanMove(direction) {
 			
 				canPass = true;
 				restorePlayerOnUndo = currentPlayer;
-				setTimeout(enterGoal, 500);
-//				enterGoal();
 			}
 			else if (goalField.key) {
 				
@@ -1450,6 +1484,7 @@ function switchPlayers() {
 
 	currentPlayer = (currentPlayer+1)%playerCount;
 	player = players[currentPlayer];
+	isJumping = true;
 }
 
 function goBack() {
@@ -1509,6 +1544,7 @@ function goBack() {
 		isGoingBack = true;
 		handlePlayerMovement();
 		updateBlocks();
+		updateCollisionMaps();
 	}
 }
 
@@ -1564,30 +1600,35 @@ function resize() {
 }
 
 document.addEventListener('touchstart', function(e) {
-		
-	if (firstTouch != null && new Date()-firstTouch < 300) {
+	
+	if (player && !player.direction && !enteredGoal && !isJumping &&
+		levelArray[player.pos[1]][player.pos[0]] != "2") {
+			
+		if (firstTouch != null && new Date()-firstTouch < 300) {
 
-		firstTouch = null;
-		switchPlayers();
-	}
-	if (canvas) {
-		
-		e.preventDefault();
-		if (e.touches.length > 1) {
-		
-			goBack();
+			firstTouch = null;
+			switchPlayers();
 		}
-		else {
-		
-			var touch = e.touches[0];
-			dragStartPos = [touch.pageX, touch.pageY]
+		if (canvas) {
+	
+			e.preventDefault();
+			if (e.touches.length > 1) {
+	
+				goBack();
+			}
+			else {
+	
+				var touch = e.touches[0];
+				dragStartPos = [touch.pageX, touch.pageY]
+			}
 		}
-	}
+	}	
 }, false);
 
 document.addEventListener('touchend', function(e) {
 		
-	if (canvas) {
+	if (canvas && !isJumping &&
+		levelArray[player.pos[1]][player.pos[0]] != "2") {
 		
 		if (e.touches.length > 1) {
 		
@@ -1637,7 +1678,9 @@ document.addEventListener('touchend', function(e) {
 
 $(document).keydown(function(e) {
 
-	if (player && !player.direction && !enteredGoal) {
+	e.preventDefault();
+	if (player && !player.direction && !enteredGoal && !isJumping &&
+		levelArray[player.pos[1]][player.pos[0]] != "2") {
 		
 		isGoingBack = false;
 		console.log(e.keyCode);
@@ -1658,10 +1701,6 @@ $(document).keydown(function(e) {
 		case 40: // down
 			player.direction = rotations[2];
 			break;
-			
-		case 8: // backspace
-			e.preventDefault();
-			break;
 		}
 		checkPlayerCanMove(player.direction);
 		handlePlayerMovement();
@@ -1670,7 +1709,9 @@ $(document).keydown(function(e) {
 
 $(document).keyup(function(e) {
 
-	if (player && !player.direction && !enteredGoal) {
+	e.preventDefault();
+	if (player && !player.direction && !enteredGoal && !isJumping &&
+		levelArray[player.pos[1]][player.pos[0]] != "2") {
 		
 		switch(e.keyCode) {
 
@@ -1679,7 +1720,6 @@ $(document).keyup(function(e) {
 			break;
 
 		case 8: // backspace
-			e.preventDefault();
 			goBack();
 			break;
 
