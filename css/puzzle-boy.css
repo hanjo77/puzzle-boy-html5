@@ -9,6 +9,7 @@ body {
 	background-position: static;
 	margin: 0;
 	padding: 0;
+	font-family: Verdana, Helvetica, sans-serif;
 }
 
 canvas {
@@ -16,4 +17,75 @@ canvas {
 	background-color: #6180b3;
 	margin: 0;
 	padding: 0;
+}
+
+.contentWrapper {
+	
+	position: relative;
+	top: 50%;
+	width: 20em;
+	margin: auto;
+	transform: translateY(-50%);
+}
+
+.contentWrapper img {
+	
+	position: absolute;
+	z-index: 1;
+}
+
+.levelFinished {
+	
+	box-shadow: 0 0 36px 36px #000;
+	color: #fff;
+	background-color: #000;
+	opacity: .7;
+	width: 15em;
+	text-align: center;
+}
+
+table {
+	
+	width: 100%;
+	padding-bottom: 1em;
+}
+
+th, td {
+	
+	width: 50%;
+	padding: 0 .1em;
+}
+
+th {
+	
+	text-align: right;
+}
+
+td {
+	
+	text-align: left;
+}
+
+.potato {
+	
+	right: -6em;
+	top: -5em;
+}
+
+.eggplant {
+
+	left: -5em;
+	top: -1em;
+}
+
+.carrot {
+	
+	bottom: -10.5em;
+	left: 2em;
+}
+
+.pepper {
+	
+	top: -5.5em;
+	left: 4em;
 }
