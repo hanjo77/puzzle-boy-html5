@@ -510,7 +510,6 @@ function drawLevel(level) {
 						player = tmpPlayer;
 						currentPlayer = players.length-1;
 					}
-					char = " ";
 				}
 				levelRow.push({
 					"sprite": spriteMap[char],
@@ -834,6 +833,7 @@ function animate() {
 		for (var elem in blocks) {
 		
 			var block = blocks[elem];
+			var oldPos = [block.pos[0], block.pos[1]];
 			if (block.direction) {
 			
 				switch (block.direction.key) {
@@ -876,6 +876,10 @@ function animate() {
 				}
 				if ((block.pos[0] == block.goal[0]) && (block.pos[1] == block.goal[1])) {
 		
+					delete(levelMap[oldPos[1]][oldPos[0]].key);
+					levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[levelArray[oldPos[1]][oldPos[0]]];
+					levelMap[block.pos[1]][block.pos[0]].key = elem;
+					levelMap[block.pos[1]][block.pos[0]].sprite = spriteMap["Z"];
 					updateBlocks()
 					block.offsetX = 0;
 					block.offsetY = 0;
@@ -934,12 +938,15 @@ function animate() {
 				player.offsetX = 0;
 				player.offsetY = 0;
 				player.direction = null;
+				isGoingBack = false;
 			}
 		
 			if (oldPos[0] != player.pos[0] || oldPos[1] != player.pos[1]) {
 		
-				// levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
+				levelMap[player.pos[1]][player.pos[0]].sprite = levelMap[oldPos[1]][oldPos[0]].sprite;
+				levelMap[oldPos[1]][oldPos[0]].sprite = spriteMap[" "];
 				oldPos = [player.pos[0], player.pos[1]];
+				isGoingBack = false;
 			}
 		}
 	}
@@ -950,13 +957,13 @@ function checkPlayerCanMove(direction) {
 	var undoMove = [];
 	var canPass = true;
 	var restorePlayerOnUndo;
-	var tmpGoal = [player.goal[0], player.goal[1]];
+	var tmpGoal = [player.pos[0], player.pos[1]];
 	if (direction) {
 	
 		// define temporary goal position
 
 		// find sprite 2 ahead in the same direction
-		var afterNext = [player.goal[0], player.goal[1]];
+		var afterNext = [tmpGoal[0], tmpGoal[1]];
 		switch (direction.key) {
 		
 			case "up":
@@ -1163,31 +1170,14 @@ function checkPlayerCanMove(direction) {
 		
 		if (canPass) {
 		
-			if (
-				(goalField.sprite.index == " ") &&
-				(levelArray[tmpGoal[1]][tmpGoal[0]] == " ")
-				) {
-
-				if (goalField.collisions && goalField.collisions.length > 0) {
-					
-					for (var collisionCount = 0; collisionCount < goalField.collisions.length; collisionCount++) {
-					
-						if (goalField.collisions[collisionCount].key == "+" &&
-							goalField.collisions[collisionCount].key == "-") {
-								
-							canPass = false;
-						}
-					}	
-				}
-			}
-			else if (goalField.sprite.spriteClass == "goal") {
+			if (goalField.sprite.spriteClass == "goal" || levelArray[tmpGoal[1]][tmpGoal[0]] == "2") {
 			
 				canPass = true;
 				restorePlayerOnUndo = currentPlayer;
 				setTimeout(enterGoal, 500);
 //				enterGoal();
 			}
-			else if (goalField.sprite.spriteClass == "block") {
+			else if (goalField.key) {
 				
 				if (levelArray[tmpGoal[1]][tmpGoal[0]] != "3") {
 				
@@ -1272,6 +1262,23 @@ function checkPlayerCanMove(direction) {
 					canPass = false;
 				}
 			}
+			else if (
+				(goalField.sprite.index == " ") &&
+				(levelArray[tmpGoal[1]][tmpGoal[0]] == " ")
+				) {
+
+				if (goalField.collisions && goalField.collisions.length > 0) {
+					
+					for (var collisionCount = 0; collisionCount < goalField.collisions.length; collisionCount++) {
+					
+						if (goalField.collisions[collisionCount].key == "+" &&
+							goalField.collisions[collisionCount].key == "-") {
+								
+							canPass = false;
+						}
+					}	
+				}
+			}
 			else {
 			
 				canPass = false;
@@ -1296,7 +1303,7 @@ function checkPlayerCanMove(direction) {
 		
 		player.goal = player.pos;
 	}
-	}
+}
 
 function enterGoal() {
 	
@@ -1305,6 +1312,7 @@ function enterGoal() {
 		
 		if (playerCount > 1) {
 		
+			var sprite = levelMap[player.pos[1]][player.pos[0]].sprite;
 			levelMap[player.pos[1]][player.pos[0]] = {
 			
 				"sprite": spriteMap["2"],
@@ -1316,6 +1324,7 @@ function enterGoal() {
 			players.push(players.splice(currentPlayer, 1)[0]);
 			players[players.length-1].pos = [-100, -100];
 			players[players.length-1].goal = [-100, -100];
+			players[players.length-1].sprite = sprite;
 			currentPlayer = 0;
 			player = players[currentPlayer];
 		}
@@ -1339,7 +1348,7 @@ function updateBlocks() {
 		for (var col = 0; col < levelRow.length; col++) {
 		
 			var sprite = levelRow[col].sprite;
-			if (sprite.spriteClass == "block") {
+			if (sprite.spriteClass == "block" || (levelRow[col].key && blocks[levelRow[col].key])) {
 							
 				levelRow[col].sprite = spriteMap[levelArray[row][col]];
 				levelRow[col].col = col;
@@ -1461,6 +1470,10 @@ function goBack() {
 					player.pos = undo.pos;
 					player.goal = undo.goal;
 					player.direction = undo.direction;
+					if (undo.sprite) {
+						
+						levelMap[undo.pos[1]][undo.pos[0]].sprite = undo.sprite;
+					}
 				}
 				else if (undo.key && blocks[undo.key]) {
 					
@@ -1468,6 +1481,8 @@ function goBack() {
 					block.pos = undo.pos;
 					block.goal = undo.goal;
 					block.direction = undo.direction;
+					levelMap[block.pos[1]][block.pos[0]].key = undo.key;
+					levelMap[block.pos[1]][block.pos[0]].sprite = spriteMap["Z"];
 				}
 			}
 			else if (undo.rotation) {
@@ -1484,8 +1499,9 @@ function goBack() {
 				backgroundCanvas.getContext("2d").drawImage(undo.sprite.drawing, pos[0], pos[1]);
 			}
 		}
-				isGoingBack = true;
+		isGoingBack = true;
 		handlePlayerMovement();
+		updateBlocks();
 	}
 }
 
