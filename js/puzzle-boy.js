@@ -1296,7 +1296,6 @@ function checkPlayerCanMove(direction) {
 						block.goal = newPos;
 						block.direction = direction;
 					}
-					
 				}
 				else {
 					
@@ -1343,6 +1342,14 @@ function checkPlayerCanMove(direction) {
 	else {
 		
 		player.goal = player.pos;
+		if (centerField) {
+			
+			centerField.rotation = {
+				"goal": 0,
+				"current": 0,
+				"direction": 0
+			};
+		}
 	}
 }
 
