@@ -95,6 +95,26 @@ var levelString = "";
 
 var sprites = {
 		
+	"block": {
+		"index": "Z",
+		"url": "block.png"
+	},
+	"brick": {
+		"index": "1",
+		"url": "brick.png",
+	},
+	"floor": {
+		"index": " ",
+		"url": "floor.png",
+	},
+	"hole": {
+		"index": "3",
+		"url": "hole.png",
+	},
+	"goal": {
+		"index": "2",
+		"url": "goal.png",
+	},
 	"player-potato": {
 		
 		"up": [
@@ -389,26 +409,6 @@ var sprites = {
 			},
 		},
 	},
-	"block": {
-		"index": "Z",
-		"url": "block.png"
-	},
-	"brick": {
-		"index": "1",
-		"url": "brick.png",
-	},
-	"floor": {
-		"index": " ",
-		"url": "floor.png",
-	},
-	"goal": {
-		"index": "2",
-		"url": "goal.png",
-	},
-	"hole": {
-		"index": "3",
-		"url": "hole.png",
-	},
 };
 
 getImages(sprites);
@@ -674,8 +674,10 @@ function drawEditorMenu() {
 		$container.append($catNode);
 		
 	}
-	$container.append('<input type="text" id="levelName" placeholder="Level name" />');
-	$container.append('<button id="saveLevel" onclick="saveLevel()">Save</button>');
+	$form = $("#options");
+	$form.append('<input type="text" id="levelName" placeholder="Level name" />');
+	$form.append('<button id="saveLevel" onclick="saveLevel()">Save</button>');
+	$form.append('<button id="deleteLevel" onclick="window.location.reload()">Clear</button>');
 }
 
 function saveLevel() {
@@ -837,6 +839,7 @@ function drawEditor() {
 		var startY = block.pos[1]*tileSize;
 		context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 	}
+	window.setTimeout(resize, 1000);
 }
 
 function loadLevel(levelId) {
@@ -1921,6 +1924,15 @@ function resize() {
 			});
 		}
 	}
+	else {
+		
+		$("#editor").css({
+			
+			position: "absolute",
+			top: ($(window).height()-$("#editor").height())/2,
+			left: ($(window).width()-$("#editor").width())/2
+		});
+	}
 }
 
 document.addEventListener('touchstart', function(e) {
@@ -2156,54 +2168,60 @@ function hasParent($child, parentId) {
 
 $(document).keydown(function(e) {
 
-	e.preventDefault();
-	if (player && !player.direction && !enteredGoal && !isJumping &&
-		levelArray[player.pos[1]][player.pos[0]] != "2") {
+	if($("#editor").length <= 0) {
 		
-		isGoingBack = false;
-		console.log(e.keyCode);
-		switch(e.keyCode) {
+		e.preventDefault();
+		if (player && !player.direction && !enteredGoal && !isJumping &&
+			levelArray[player.pos[1]][player.pos[0]] != "2") {
 		
-		case 37: // left
-			player.direction = rotations[3];
-			break;
+			isGoingBack = false;
+			console.log(e.keyCode);
+			switch(e.keyCode) {
+		
+			case 37: // left
+				player.direction = rotations[3];
+				break;
 
-		case 38: // up
-			player.direction = rotations[0];
-			break;
+			case 38: // up
+				player.direction = rotations[0];
+				break;
 
-		case 39: // right
-			player.direction = rotations[1];
-			break;
+			case 39: // right
+				player.direction = rotations[1];
+				break;
 
-		case 40: // down
-			player.direction = rotations[2];
-			break;
+			case 40: // down
+				player.direction = rotations[2];
+				break;
+			}
+			checkPlayerCanMove(player.direction);
+			handlePlayerMovement();
 		}
-		checkPlayerCanMove(player.direction);
-		handlePlayerMovement();
 	}
 });
 
 $(document).keyup(function(e) {
 
-	e.preventDefault();
-	if (player && player.pos && !player.direction && !enteredGoal && !isJumping &&
-		levelArray[player.pos[1]][player.pos[0]] != "2") {
+	if($("#editor").length <= 0) {
 		
-		switch(e.keyCode) {
+		e.preventDefault();
+		if (player && player.pos && !player.direction && !enteredGoal && !isJumping &&
+			levelArray[player.pos[1]][player.pos[0]] != "2") {
+		
+			switch(e.keyCode) {
 
-		case 16: // shift
-			switchPlayers();
-			break;
+			case 16: // shift
+				switchPlayers();
+				break;
 
-		case 8: // backspace
-			goBack();
-			break;
+			case 8: // backspace
+				goBack();
+				break;
 
-		case 27: // escape
-			window.location.reload();
-			break;
+			case 27: // escape
+				window.location.reload();
+				break;
+			}
 		}
 	}
 });
