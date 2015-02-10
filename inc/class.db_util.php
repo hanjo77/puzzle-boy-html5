@@ -66,7 +66,6 @@ class DBUtil {
 		{
 			$rows[] = $row;
 		}
-		
 				
 		/* free result set */
 		$result->close();
@@ -87,9 +86,11 @@ class DBUtil {
     function insert($query) {
 	       
 	  	$this->connect();
-		mysql_query(preg_replace("/\[\[\[([^\]\]\]]*)\]\]\]/", mysql_real_escape_string("$1"), $query));
-		$id = mysql_insert_id();
-		mysql_close();
+		$query = preg_replace("/\[\[\[([^\]\]\]]*)\]\]\]/", mysql_real_escape_string("$1"), $query);
+		$this->mysqli->query($query);
+		mysql_query($query);
+		$id = $this->mysqli->insert_id;
+		$this->mysqli->close();
 		return $id;	
 	}
 }

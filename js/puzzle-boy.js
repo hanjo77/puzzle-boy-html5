@@ -1,6 +1,7 @@
-var canvas, context, bgSprite, sprites, levelMap, blocks, rotators, 
-levelArray, players, player, undoSteps, gameLoop, dragStartPos, 
-backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime;
+var canvas, context, bgSprite, sprites, levelMap, blocks, tmpBlock, rotators, currentId,
+levelArray, players, player, goalPos, undoSteps, gameLoop, dragStartPos, 
+backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime,
+mousePressed, draggable;
 
 var jumpSpeed = 8;
 
@@ -19,6 +20,8 @@ var gameSpeed = 1000/60;
 var fieldSize = [0, 0];
 
 var spritePath = "sprites/";
+
+var topBlockChar = String.fromCharCode(128);
 
 var rotations = [
 	{
@@ -532,6 +535,10 @@ function drawLevel(level) {
 					"row": row,
 					"key": char
 				};
+				if (char.charCodeAt(0) > 190) {
+					
+					char = String.fromCharCode(char.charCodeAt(0)-64);
+				}
 				if (!blocks[char]) {
 			
 					var width = 0;
@@ -555,7 +562,7 @@ function drawLevel(level) {
 						"offsetX": 0,
 						"offsetY": 0
 					};
-					blocks[char].canvas = getBlockCanvas(blockField);
+					blocks[char].canvas = getBlockCanvas(blocks[blockField.key]);
 				}
 				levelRow.push(blockField);
 			}
@@ -579,6 +586,256 @@ function drawLevel(level) {
 	if (!startTime) {
 		
 		startTime = new Date();
+	}
+}
+
+function startEditor() {
+	
+	levelString = "";
+	players = [];
+	player = {};
+	levelMap = [];
+	blocks = {};
+	rotators = [];
+	levelArray = [];
+	undoSteps = [];
+	playerIndexes = [];
+	fieldSize = [20, 20];
+	for (var row = 0; row < fieldSize[1]; row++) {
+	
+		var levelRow = [];
+		var rawLevelRow = [];
+		for (var col = 0; col < fieldSize[0]; col++) {
+		
+			var defaultTile = "1";
+			levelRow.push({
+				"sprite": spriteMap[defaultTile],
+				"col": col,
+				"row": row
+			});
+			rawLevelRow.push(defaultTile);
+			levelString += defaultTile;
+		}
+		levelMap.push(levelRow);
+		levelArray.push(rawLevelRow);
+		levelString += "\n";
+	}
+
+	canvas = $("#playground").get(0);
+	canvas.width = fieldSize[0]*tileSize;
+	canvas.height = fieldSize[1]*tileSize;
+	context = canvas.getContext("2d");
+
+	drawEditorMenu();
+	setTimeout(drawEditor, 1000);
+}
+
+function drawEditorMenu() {
+	
+	var $container = $("#controls");
+	$container.html("");
+	for (var cat in sprites) {
+		
+		var $catNode = $('<div id="' + cat + '"></div>');
+		switch (cat) {
+			
+		case "rotation":
+			
+			for (var type in sprites[cat]) {
+				
+				var first;
+				for (first in sprites[cat][type]) break;
+				if (sprites[cat][type][first].url) {
+					
+					$catNode.append('<img src="' + spritePath + sprites[cat][type][first].url + 
+						'" id="' + sprites[cat][type][first].index + '" data-type="' + type + '" data-cat="' + first + '" />')
+				}
+			}
+			break;
+			
+		default:
+
+			var url = sprites[cat].url;
+			var index = sprites[cat].index;
+			if (!url) {
+				
+				if (sprites[cat]["down"] && sprites[cat]["down"][0].url) {
+					
+					url = sprites[cat]["down"][0].url;
+					index = sprites[cat]["down"][0].index;
+				}
+			}
+			if (url) {
+			
+				$catNode.append('<img src="' + spritePath + url + '" id="' + index + '" data-cat="' + cat + '" />')
+			}
+			break;
+		}
+		$container.append($catNode);
+		
+	}
+	$container.append('<input type="text" id="levelName" placeholder="Level name" />');
+	$container.append('<button id="saveLevel" onclick="saveLevel()">Save</button>');
+}
+
+function saveLevel() {
+	
+	var levelString = "";
+	var hasStarted = false;
+	var lowestRow = -1;
+	var highestRow = 0;
+	var lowestCol = -1;
+	var highestCol = 0;
+	for (var row = 0; row < levelArray.length; row++) {
+
+		var isEmpty = true;
+		for (var col = 0; col < levelArray[row].length; col++) {
+		
+			var char = levelArray[row][col];
+			if (char != "1") {
+				
+				isEmpty = false;
+				hasStarted = true;
+			}
+		}
+		if (isEmpty) {
+			
+			if (!hasStarted) {
+				
+				lowestRow = row;
+			}
+			else {
+				
+				highestRow = row;
+				break;
+			}
+		}
+	}
+	hasStarted = false;
+	for (var col = 0; col < levelArray[0].length; col++) {
+
+		var isEmpty = true;
+		for (var row = 0; row < levelArray.length; row++) {
+		
+			var char = levelArray[row][col];
+			if (char != "1") {
+				
+				isEmpty = false;
+				hasStarted = true;
+			}
+		}
+		if (isEmpty) {
+			
+			if (!hasStarted) {
+				
+				lowestCol = col;
+			}
+			else {
+				
+				highestCol = col;
+				break;
+			}
+		}
+	}
+	for (var elem in blocks) {
+
+		var block = blocks[elem];
+		for (var row = block.pos[1]; row < block.pos[1]+block.size[1]; row++) {
+		
+			for (var col = block.pos[0]; col < block.pos[0]+block.size[0]; col++) {
+		
+				if (levelArray[row][col] == "3") {
+					
+					levelArray[row][col] = String.fromCharCode(elem.charCodeAt(0)+64);
+				}
+				else {
+					
+					levelArray[row][col] = elem;
+				}
+			}
+		}
+	}
+	if (lowestRow < 0) {
+	
+		if (lowestCol < 0) {
+		
+			levelString += "1";
+		}
+		for (var col = lowestCol; col <= highestCol; col++) {
+			
+			levelString += "1";
+		}
+		levelString += "\n";
+	}
+	for (var row = lowestRow; row <= highestRow; row++) {
+		
+		if (row > lowestRow) {
+			
+			levelString += "\n";
+		}
+		if (lowestCol < 0) {
+		
+			levelString += "1";
+		}
+		for (var col = lowestCol; col <= highestCol; col++) {
+			
+			var char = levelArray[row][col];
+			levelString += char;
+		}
+	}
+	var data = {
+		"data": levelString
+	};
+	if (currentId) {
+	
+		data.id = currentId;
+	}
+	$.ajax({
+	  type: "POST",
+	  url: "level.php",
+	  data: data,
+	  success: function(data) {
+	  	
+		  currentId = parseInt(data, 10);
+	  }
+	});
+	console.log(levelString);
+}
+
+function drawEditor() {
+	
+	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
+	// draw background
+	context.drawImage(drawBackground(), 0, 0);
+	for (var row = 0; row < levelArray.length; row++) {
+		
+		var levelRow = levelArray[row];
+		for (var col = 0; col < levelRow.length; col++) {
+			
+			var sprite = spriteMap[levelArray[row][col]];
+			if (sprite && sprite.drawing && sprite.index != " " && sprite.index != "3" && sprite.index != "Z" && spriteMap[sprite.index] && (bgKeys.indexOf(sprite.index) == -1)) {
+
+				var tmpRow = row;
+				var tmpCol = col;
+				if (sprite.spriteClass == "rotation") {
+					
+					tmpCol--;
+					tmpRow--;
+				}
+				context.drawImage(sprite.drawing, (tmpCol*tileSize), (tmpRow*tileSize));
+			}
+		}
+	}
+	if (tmpBlock) {
+		
+		context.drawImage(tmpBlock.canvas, tmpBlock.pos[0]*tileSize, tmpBlock.pos[1]*tileSize);
+	}
+	for (var elem in blocks) {
+
+		var block = blocks[elem];
+		var startX = block.pos[0]*tileSize;
+		var startY = block.pos[1]*tileSize;
+		context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 	}
 }
 
@@ -613,7 +870,14 @@ function drawBackground() {
 				var drawing = sprite.drawing;
 				if (bgKeys.indexOf(sprite.index) == -1) {
 					
-					drawing = spriteMap[" "].drawing;
+					if (sprite.index.charCodeAt(0) > 190) {
+						
+						drawing = spriteMap["3"].drawing;
+					}
+					else {
+						
+						drawing = spriteMap[" "].drawing;
+					}
 				}
 				var pos = [
 					((tileSize / 2)+(col*tileSize))-(tileSize/2), 
@@ -626,12 +890,11 @@ function drawBackground() {
 	return bgCanvas;
 }
 
-function getBlockCanvas(blockField) {
+function getBlockCanvas(block) {
 	
 	var blockCanvas = document.createElement("canvas");
 	var blockContext = blockCanvas.getContext("2d");
 	var sprite = spriteMap["Z"];
-	var block = blocks[blockField.key];
 	blockCanvas.width = block.size[0]*tileSize;
 	blockCanvas.height = block.size[1]*tileSize;
 	blockContext.clearRect(0, 0, blockCanvas.width, blockCanvas.height);
@@ -1605,6 +1868,14 @@ $(document).ready(function() {
 		$("body").html("");
 		loadLevel(levelNr);
 	}
+	else if (window.location.hash.indexOf("#editor") > -1) {
+		
+		$.ajax("editor.php").done(function(data) {
+			
+			$("body").html(data);
+			startEditor();
+		});
+	}
 	else {
 		
 		window.location.hash = "";
@@ -1625,26 +1896,29 @@ window.addEventListener("orientationchange", function() {
 
 function resize() {
 	
-	if (canvas) {
+	if ($("#editor").length <= 0) {
 		
-		var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
-		$(canvas).css({
+		if (canvas) {
 		
-			position: "absolute",
-			top: offset[1],
-			left: offset[0] 
-		});
+			var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
+			$(canvas).css({
 		
-		$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
-	}
-	else {
+				position: "absolute",
+				top: offset[1],
+				left: offset[0] 
+			});
 		
-		$("#title").css({
+			$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+		}
+		else {
+		
+			$("#title").css({
 
-			position: "absolute",
-			top: ($(window).height()-$("#title img").height())/2,
-			left: ($(window).width()-$("#title img").width())/2
-		});
+				position: "absolute",
+				top: ($(window).height()-$("#title img").height())/2,
+				left: ($(window).width()-$("#title img").width())/2
+			});
+		}
 	}
 }
 
@@ -1725,6 +1999,160 @@ document.addEventListener('touchend', function(e) {
 	}
 }, false);
 
+$(document).mousedown(function(e) {
+	
+	mousePressed = true;
+	if ($("#editor").length > 0) {
+		
+		if ($(e.target).parent().parent().attr("id") == "controls") {
+			
+			$("#controls img").css({
+			
+				"box-shadow": "none",
+				"background-color": "transparent"
+			});
+			if (draggable && (draggable.attr("src") == $(e.target).attr("src")) && ($(e.target).parent().attr("id") == "rotation")) {
+				
+				var rotation = rotationIndexByKey($(e.target).attr("data-cat"));
+				var type = $(e.target).attr("data-type");
+				rotation = rotations[(rotation+1)%rotations.length];
+				draggable.attr("src", spritePath + sprites["rotation"][type][rotation.key].url);
+				draggable.attr("id", sprites["rotation"][type][rotation.key].index);
+				draggable.attr("data-cat", rotation.key);
+			}
+			else {
+				
+				draggable = $(e.target);
+			}
+			$(e.target).css({
+				
+				"box-shadow": "0 0 5px 5px #999",
+				"background-color": "#999"
+			});
+		}
+		else if (draggable && ($(e.target).attr("id") == "items" || $(e.target).parent().attr("id") == "items")) {
+			
+			addEditorItem(e);
+		}
+	}
+});
+
+function addEditorItem(event) {
+	
+	$target = $(event.target);
+	event.preventDefault();
+	var posX = Math.floor((event.offsetX)/tileSize);
+	var posY = Math.floor((event.offsetY)/tileSize);
+	if (draggable.parent().attr("id") == "block") {
+		
+		if (!tmpBlock) {
+			
+			tmpBlock = {
+					"pos": [posX, posY],
+					"goal": [posX, posY],
+					"offsetX": 0,
+					"offsetY": 0
+			};
+		}
+		tmpBlock.size = [Math.abs((posX-tmpBlock.pos[0])+1), Math.abs((posY-tmpBlock.pos[1])+1)];
+		if (posX < tmpBlock.pos[0]) {
+		
+			tmpBlock.pos[0] = posX;
+		}
+		if (posY < tmpBlock.pos[1]) {
+		
+			tmpBlock.pos[1] = posY;
+		}
+		tmpBlock.canvas = getBlockCanvas(tmpBlock);
+	}
+	else {
+		
+		levelArray[posY][posX] = draggable.attr("id");
+		if (spriteMap[draggable.attr("id")]) {
+		
+			if (playerKeys.indexOf(draggable.attr("id")) > -1) {
+			
+				var player = players[draggable.attr("id")];
+				if (player) {
+				
+					levelArray[player.row][player.col] = " ";
+					levelMap[player.row][player.col] = {
+						"sprite": spriteMap[" "],
+						"col": player.col,
+						"row": player.row
+					};
+				}
+				players[draggable.attr("id")] = {
+					"col": posX,
+					"row": posY
+				};
+			}
+			if (draggable.attr("id") == "2") {
+			
+				if (goalPos) {
+				
+					levelArray[goalPos.row][goalPos.col] = " ";
+					levelMap[goalPos.row][goalPos.col] = {
+						"sprite": spriteMap[" "],
+						"col": goalPos.col,
+						"row": goalPos.row
+					};
+				}
+				goalPos = {
+					"col": posX,
+					"row": posY
+				};
+			}
+			levelMap[posY][posX] = {
+				"sprite": spriteMap[draggable.attr("id")],
+				"col": posX,
+				"row": posY
+			};
+		}
+	}
+	for (var elem in blocks) {
+		
+		var block = blocks[elem];
+		if ((block.pos[0] <= posX) && ((block.pos[0]+block.size[0]) > posX) &&
+			(block.pos[1] <= posY) && ((block.pos[1]+block.size[1]) > posY)) {
+				
+			delete blocks[elem];
+		}
+	}
+	drawEditor();
+}
+
+$(document).mousemove(function(e) {
+	
+	if (mousePressed && draggable && ($(e.target).attr("id") == "items" || $(e.target).parent().attr("id") == "items")) {
+		addEditorItem(e);
+	}
+});
+
+$(document).mouseup(function(e) {
+	
+	mousePressed = false;
+	if (tmpBlock) {
+		
+		blocks[topBlockChar] = tmpBlock;
+		topBlockChar = String.fromCharCode(topBlockChar.charCodeAt(0)+1);
+	}
+	tmpBlock = null;
+});
+
+function hasParent($child, parentId) {
+	
+	while ($child) {
+		
+		if ($child.attr("id") == parentId) {
+			
+			return true;
+		}
+		$child = $child.parent();
+	}
+	return false;
+}
+
 $(document).keydown(function(e) {
 
 	e.preventDefault();
@@ -1759,7 +2187,7 @@ $(document).keydown(function(e) {
 $(document).keyup(function(e) {
 
 	e.preventDefault();
-	if (player && !player.direction && !enteredGoal && !isJumping &&
+	if (player && player.pos && !player.direction && !enteredGoal && !isJumping &&
 		levelArray[player.pos[1]][player.pos[0]] != "2") {
 		
 		switch(e.keyCode) {

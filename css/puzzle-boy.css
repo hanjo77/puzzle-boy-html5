@@ -104,3 +104,43 @@ td {
 	font-weight: bold;
 	color: #000;
 }
+
+#editor #playground {
+	
+	box-shadow: 0 0 32px 32px #000;
+	color: #fff;
+	background-color: #000;
+	margin: 32px;
+	float: left;
+	width: 640px;
+	height: 640px;
+}
+
+#editor #items, #editor #bgItems {
+	position: absolute;
+	top: 32px;
+	left: 32px;
+	width: 640px;
+	height: 640px;
+}
+
+#editor #controls {
+	
+	box-shadow: 0 0 32px 32px #000;
+	color: #fff;
+	background-color: #000;
+	margin: 32px;
+	width: 288px;
+	display: block;
+	float: left;
+}
+
+#editor #controls div {
+	
+	float: left;
+}
+
+#editor #controls img {
+
+	margin: 5px;
+}
