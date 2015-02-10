@@ -60,6 +60,7 @@ class DBUtil {
 	function query($query) {
 	       
 	  	$this->connect();
+		mysqli_set_charset($this->mysqli,"latin1");
 		$result = $this->mysqli->query($query);
 
 		while($row = $result->fetch_assoc())

@@ -54,11 +54,11 @@ class Level {
 			." order by `d`.`id`, `lo`.`number`"; */
 		if ($id > 0) {
 			
-			return json_encode($db_util->query($query)[0]);
+			return json_encode($db_util->query($query)[0], JSON_UNESCAPED_UNICODE);
 		}
 		else {
 			
-			return json_encode($db_util->query($query));
+			return json_encode($db_util->query($query), JSON_UNESCAPED_UNICODE);
 		}
 	}
 

@@ -842,6 +842,7 @@ function drawEditor() {
 function loadLevel(levelId) {
 	
 	levelNr = levelId;
+	$.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
 	$.getJSON( "level.php?id=" + levelId, function(level) {
 
 		setTimeout(function() {

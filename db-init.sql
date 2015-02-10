@@ -55,7 +55,7 @@ INSERT INTO `user` (`id`, `name`, `password`, `email`, `active`) VALUES
 
 CREATE TABLE IF NOT EXISTS `level` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `data` text NOT NULL,
+  `data` text NOT NULL  COLLATE utf8_unicode_ci,
   `creator` int(11) NOT NULL,
   `active` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
