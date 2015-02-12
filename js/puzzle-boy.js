@@ -97,7 +97,7 @@ var sprites = {
 		
 	"block": {
 		"index": "Z",
-		"url": "block.png"
+		"url": "block-small.png"
 	},
 	"brick": {
 		"index": "1",
@@ -913,7 +913,7 @@ function getBlockCanvas(block) {
 		0, 
 		(block.size[0]-1)*tileSize, 
 		(tileSize/2));
-	blockContext.drawImage(sprite.drawing, (tileSize/2)*3, 0, (tileSize/2), (tileSize/2), 
+	blockContext.drawImage(sprite.drawing, (tileSize/2), 0, (tileSize/2), (tileSize/2), 
 		((block.size[0]-1)*tileSize)+(tileSize/2), 
 		0, 
 		(tileSize/2), 
@@ -931,24 +931,24 @@ function getBlockCanvas(block) {
 			(tileSize/2), 
 			(block.size[0]-1)*tileSize, 
 			(block.size[1]-1)*tileSize);
-		blockContext.drawImage(sprite.drawing, (tileSize/2)*3, (tileSize/2), (tileSize/2), 1, 
+		blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2), (tileSize/2), 1, 
 			((block.size[0]-1)*tileSize)+(tileSize/2), 
 			(tileSize/2), 
 			(tileSize/2), 
 			(block.size[1]-1)*tileSize);
 	// }
 	// bottom
-	blockContext.drawImage(sprite.drawing, 0, (tileSize/2)*3, (tileSize/2), (tileSize/2), 
+	blockContext.drawImage(sprite.drawing, 0, (tileSize/2), (tileSize/2), (tileSize/2), 
 		0, 
 		((block.size[1]-1)*tileSize)+(tileSize/2), 
 		(tileSize/2), 
 		(tileSize/2));
-	blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2)*3, 1, (tileSize/2), 
+	blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2), 1, (tileSize/2), 
 		(tileSize/2), 
 		((block.size[1]-1)*tileSize)+(tileSize/2), 
 		(block.size[0]-1)*tileSize, 
 		(tileSize/2));
-	blockContext.drawImage(sprite.drawing, (tileSize/2)*3, (tileSize/2)*3, (tileSize/2), (tileSize/2), 
+	blockContext.drawImage(sprite.drawing, (tileSize/2), (tileSize/2), (tileSize/2), (tileSize/2), 
 		((block.size[0]-1)*tileSize)+(tileSize/2), 
 		((block.size[1]-1)*tileSize)+(tileSize/2), 
 		(tileSize/2), 
