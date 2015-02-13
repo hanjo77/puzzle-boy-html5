@@ -7,7 +7,7 @@ var jumpSpeed = 8;
 
 var currentPlayer = 0;
 
-var animSpeed = 3;
+var animSpeed = 1;
 
 var swipeTolerance = 50;
 
@@ -1750,33 +1750,28 @@ function enterGoal() {
 
 function endLevel() {
 	
-	var timeSpent = Math.floor((new Date()-startTime)/1000);
-	startTime = null;
-	var playersQuery = "";
-	for (var i = 0; i < playerKeys.length; i++) {
+	if (startTime) {
 		
-		var key = playerKeys[i];
-		if (levelString.indexOf(key) > -1) {
+		var timeSpent = Math.floor((new Date()-startTime)/1000);
+		startTime = null;
+		var playersQuery = "";
+		for (var i = 0; i < playerKeys.length; i++) {
+		
+			var key = playerKeys[i];
+			if (levelString.indexOf(key) > -1) {
 			
-			playersQuery += "&" + spriteMap[key].spriteClass.replace("player-", "") + "=true";
+				playersQuery += "&" + spriteMap[key].spriteClass.replace("player-", "") + "=true";
+			}
 		}
-	}
-	cancelAnimationFrame(gameLoop);
-	$.ajax({
-	  url: "level-solved.php?level=" + levelNr + "&time=" + timeSpent + "&moves=" + undoSteps.length + playersQuery,
-	  context: document.body
-	}).done(function(data) {
+		cancelAnimationFrame(gameLoop);
+		$.ajax({
+		  url: "level-solved.php?level=" + levelNr + "&time=" + timeSpent + "&moves=" + undoSteps.length + playersQuery,
+		  context: document.body
+		}).done(function(data) {
 		
-		$("body").html(data);
-		$(".btnContinue").click(function() {
-			
-			loadLevel(levelNr+1);
+			$("body").html(data);
 		});
-		$(".btnRetry").click(function() {
-			
-			loadLevel(levelNr);
-		});
-	});
+	}
 }
 
 function updateBlocks() {
