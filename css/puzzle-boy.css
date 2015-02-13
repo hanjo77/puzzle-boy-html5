@@ -272,6 +272,11 @@ td {
 	padding: 0;
 }
 
+#gameSelection li {
+	
+	height: 160px;
+}
+
 #levelSelection {
 	
 	margin: 0;

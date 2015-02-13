@@ -147,6 +147,7 @@ INSERT INTO `level` (`id`, `data`, `creator`, `active`) VALUES
 CREATE TABLE IF NOT EXISTS `origin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `background` varchar(255) COLLATE utf8_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_ORIGIN_NAME` (`name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
@@ -155,10 +156,9 @@ CREATE TABLE IF NOT EXISTS `origin` (
 -- Daten für Tabelle `origin`
 --
 
-INSERT INTO `origin` (`id`, `name`) VALUES
-(1, 'Puzzle Boy / Kwirk Gameboy'),
-(2, 'Puzzle Boy 2 / A-mazing Tater'),
-(3, 'Puzzle Boy PC-Engine');
+INSERT INTO `origin` (`id`, `name`, `background`) VALUES
+(1, 'Puzzle Boy / Kwirk Gameboy', 'img/bg-kwirk.jpg'),
+(2, 'Puzzle Boy 2 / A-mazing Tater', 'img/bg-tater.jpg');
 
 -- --------------------------------------------------------
 

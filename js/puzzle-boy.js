@@ -832,7 +832,7 @@ function drawGameSelection() {
 		var $container = $("#gameSelection");
 		for (var i = 0; i < games.length; i++) {
 			
-			$container.append('<li><a href="#game' + games[i].id + '">' + games[i].name + '</a></li>');
+			$container.append('<li style="background-image: url(' + games[i].background + ')"><a href="#game' + games[i].id + '">' + games[i].name + '</a></li>');
 		}
 	});
 }
@@ -1750,6 +1750,7 @@ function enterGoal() {
 
 function endLevel() {
 	
+	enteredGoal = false;
 	if (startTime) {
 		
 		var timeSpent = Math.floor((new Date()-startTime)/1000);

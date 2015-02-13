@@ -87,7 +87,7 @@ class Level {
 		
 		$data = array();
 		$db_util = new DBUtil();
-		$query = "select `o`.`id`, `o`.`name`"
+		$query = "select `o`.`id`, `o`.`name`, `o`.`background`"
 					." from origin `o`";
 		
 		return json_encode($db_util->query($query), JSON_UNESCAPED_UNICODE);
