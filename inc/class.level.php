@@ -82,6 +82,53 @@ class Level {
 		}
 		return json_encode($db_util->insert($query));
 	}
+	
+	function get_games() {
+		
+		$data = array();
+		$db_util = new DBUtil();
+		$query = "select `o`.`id`, `o`.`name`"
+					." from origin `o`";
+		
+		return json_encode($db_util->query($query), JSON_UNESCAPED_UNICODE);
+	}
+	
+	function get_difficulties($origin_id) {
+		
+		$data = array();
+		$db_util = new DBUtil();
+		$query = "select distinct `d`.`id`, `d`.`name`"
+					." from difficulty `d`"
+					." inner join level_origin `lo` on `lo`.`difficulty_id` = `d`.`id`"
+					." where `lo`.`origin_id` = ".$origin_id
+					." order by `d`.`id`";
+		
+		return json_encode($db_util->query($query), JSON_UNESCAPED_UNICODE);
+	}
+	
+	function get_levels($origin_id, $difficulty_id) {
+		
+		$data = array();
+		$condition = "";
+		if (isset($origin_id)) {
+			
+			$condition = " where `o`.`id` = ".$origin_id;
+			if (isset($difficulty_id)) {
+				
+				$condition .= " and `d`.`id` = ".$difficulty_id;
+			}
+		}
+		$db_util = new DBUtil();
+		$query = "select `l`.`id`, `o`.`name` `origin`, `d`.`name` `difficulty`, `lo`.`number` `number`, `l`.`data`"
+			." from level `l`"
+			." inner join `level_origin` `lo` on `lo`.`level_id` = `l`.`id`"
+			." inner join `origin` `o` on `lo`.`origin_id` = `o`.`id`"
+			." inner join `difficulty` `d` on `lo`.`difficulty_id` = `d`.`id`"
+			.$condition
+			." order by `d`.`id`, `lo`.`number`";
+		
+		return json_encode($db_util->query($query), JSON_UNESCAPED_UNICODE);
+	}
 }
 
 ?>

@@ -464,7 +464,7 @@ function getImages(obj, className, catName) {
 	}
 }
 
-function drawLevel(level) {
+function drawLevel(level, loadOnly) {
 	
 	levelString = level;
 	players = [];
@@ -571,21 +571,24 @@ function drawLevel(level) {
 		levelArray.push(rawLevelRow);
 	}
 
-	$("body").html('<canvas id="playground"></canvas>');
-	canvas = $("#playground").get(0);
-	canvas.width = fieldSize[0];
-	canvas.height = fieldSize[1];
-	context = canvas.getContext("2d");
-
-	updateCollisionMaps();
-	resize();
-
-	backgroundCanvas = drawBackground();
-	drawPlayground();
-	isJumping = true;
-	if (!startTime) {
+	if (!loadOnly) {
 		
-		startTime = new Date();
+		$("body").html('<canvas id="playground"></canvas>');
+		canvas = $("#playground").get(0);
+		canvas.width = fieldSize[0];
+		canvas.height = fieldSize[1];
+		context = canvas.getContext("2d");
+
+		updateCollisionMaps();
+		resize();
+
+		backgroundCanvas = drawBackground();
+		drawPlayground();
+		isJumping = true;
+		if (!startTime) {
+		
+			startTime = new Date();
+		}
 	}
 }
 
@@ -809,6 +812,99 @@ function drawEditor() {
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
 	// draw background
 	context.drawImage(drawBackground(), 0, 0);
+	context.drawImage(drawPlaygroundCanvas(), 0, 0);
+	updateCollisionMaps();
+	window.setTimeout(resize, 1000);
+}
+
+function drawGameSelection() {
+	
+	$.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
+	$.getJSON( "games.php", function(games) {
+
+		$("body").html('<div class="selectionWrapper">'
+			+ '<div class="selection">'
+			+ '<h1>Choose game:</h1>'
+			+ '<ul class="selection" id="gameSelection"></ul>'
+			+ '<a class="backLink" href="#">Back</a>'
+			+ '</div>'
+			+ '</div>');
+		var $container = $("#gameSelection");
+		for (var i = 0; i < games.length; i++) {
+			
+			$container.append('<li><a href="#game' + games[i].id + '">' + games[i].name + '</a></li>');
+		}
+	});
+}
+
+function drawDifficultySelection(originId) {
+	
+	$.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
+	$.getJSON( "difficulties.php?origin=" + originId, function(difficulties) {
+
+		$("body").html('<div class="selectionWrapper">'
+			+ '<div class="selection">'
+			+ '<h1>Choose difficulty:</h1>'
+			+ '<ul class="selection" id="difficultySelection"></ul>'
+			+ '<a class="backLink" href="#games">Back</a>'
+			+ '</div>'
+			+ '</div>');
+		var $container = $("#difficultySelection");
+		for (var i = 0; i < difficulties.length; i++) {
+			
+			$container.append('<li><a href="#difficulty' + originId + '|' + difficulties[i].id + '">' + difficulties[i].name + '</a></li>');
+		}
+	});
+}
+
+function drawLevelSelection(originId, difficultyId) {
+	
+	$.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
+	$.getJSON( "level.php?origin=" + originId + "&difficulty=" + difficultyId, function(levels) {
+
+		$("body").html('<div class="selectionWrapper">'
+			+ '<div class="selection">'
+			+ '<h1>Choose level:</h1>'
+			+ '<ul id="levelSelection"></ul>'
+			+ '<a class="backLink" href="#game' + originId + '">Back</a>'
+			+ '</div>'
+			+ '</div>');
+		var $container = $("#levelSelection");
+		for (var i = 0; i < levels.length; i++) {
+			
+			$container.append('<li id="levelLink' + levels[i].id + '">'
+				+ '<a href="#level' + levels[i].id + '">'
+				+ '<div class="canvasContainer"></div>'
+				+ levels[i].number
+				+ '</a>'
+				+ '</li>');
+			drawLevel(levels[i].data, true);
+			var iconCanvas = document.createElement("canvas");
+			iconCanvas.width = levelMap[0].length*tileSize;
+			iconCanvas.height = levelMap.length*tileSize;
+			var iconContext = iconCanvas.getContext("2d");			
+			iconContext.drawImage(drawBackground(), 0, 0);
+			iconContext.drawImage(drawPlaygroundCanvas(), 0, 0);
+			
+	        // translate context to center of canvas
+	        iconContext.translate(iconCanvas.width / 2, iconCanvas.height / 2);
+
+	        // scale y component
+	        // iconContext.scale(1, 0.5);			
+			
+			iconContext.scale(1/tileSize, 1/tileSize);
+			$("#levelLink"+levels[i].id+" .canvasContainer").first().append(iconCanvas);
+		}
+	});
+}
+
+function drawPlaygroundCanvas() {
+	
+	var playgroundCanvas = document.createElement("canvas");
+	playgroundCanvas.width = levelMap[0].length*tileSize;
+	playgroundCanvas.height = levelMap.length*tileSize;
+	var playgroundContext = playgroundCanvas.getContext("2d");	
+	var col, row;
 	for (var row = 0; row < levelArray.length; row++) {
 		
 		var levelRow = levelArray[row];
@@ -824,22 +920,22 @@ function drawEditor() {
 					tmpCol--;
 					tmpRow--;
 				}
-				context.drawImage(sprite.drawing, (tmpCol*tileSize), (tmpRow*tileSize));
+				playgroundContext.drawImage(sprite.drawing, (tmpCol*tileSize), (tmpRow*tileSize));
 			}
 		}
 	}
 	if (tmpBlock) {
 		
-		context.drawImage(tmpBlock.canvas, tmpBlock.pos[0]*tileSize, tmpBlock.pos[1]*tileSize);
+		playgroundContext.drawImage(tmpBlock.canvas, tmpBlock.pos[0]*tileSize, tmpBlock.pos[1]*tileSize);
 	}
 	for (var elem in blocks) {
 
 		var block = blocks[elem];
 		var startX = block.pos[0]*tileSize;
 		var startY = block.pos[1]*tileSize;
-		context.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
+		playgroundContext.drawImage(block.canvas, startX+block.offsetX, startY+block.offsetY);
 	}
-	window.setTimeout(resize, 1000);
+	return playgroundCanvas;
 }
 
 function loadLevel(levelId) {
@@ -1866,27 +1962,59 @@ function goBack() {
 
 $(document).ready(function() {
 
+	checkHash();
+	window.onhashchange = checkHash;
+	resize();
+});
+
+function checkHash() {
+	
 	levelNr = parseInt(window.location.hash.replace("#level", ""), 10);
-	if (!isNaN(levelNr)) {
+	if (window.location.hash.indexOf("#level") > -1 && !isNaN(levelNr)) {
 		
 		$("body").html("");
 		loadLevel(levelNr);
 	}
 	else if (window.location.hash.indexOf("#editor") > -1) {
 		
+		$("body").html("");
 		$.ajax("editor.php").done(function(data) {
 			
 			$("body").html(data);
 			startEditor();
 		});
 	}
+	else if (window.location.hash.indexOf("#games") > -1) {
+		
+		$("body").html("");
+		drawGameSelection();
+	}
+	else if (window.location.hash.indexOf("#game") > -1) {
+		
+		$("body").html("");
+		var game = parseInt(window.location.hash.replace("#game", ""), 10);
+		if (!isNaN(game)) {
+			
+			drawDifficultySelection(game);
+		}
+	}
+	else if (window.location.hash.indexOf("#difficulty") > -1) {
+		
+		$("body").html("");
+		var difficulty = window.location.hash.replace("#difficulty", "").split("|");
+		if (difficulty.length > 1) {
+			
+			drawLevelSelection(difficulty[0], difficulty[1]);
+		}
+	}
 	else {
 		
 		window.location.hash = "";
 		levelNr = 1;
+		$("body").html('<a href="#games" id="title"><img src="img/title.png" /></a>');
 	}
 	resize();
-});
+}
 
 $(window).resize(function() {
 	
@@ -1902,26 +2030,20 @@ function resize() {
 	
 	if ($("#editor").length <= 0) {
 		
-		if (canvas) {
+		if ($(".selection").length <= 0) {
+			
+			if (canvas) {
 		
-			var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
-			$(canvas).css({
+				var offset = [($(window).width()-canvas.width)/2, ($(window).height()-canvas.height)/2];
+				$(canvas).css({
 		
-				position: "absolute",
-				top: offset[1],
-				left: offset[0] 
-			});
+					position: "absolute",
+					top: offset[1],
+					left: offset[0] 
+				});
 		
-			$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
-		}
-		else {
-		
-			$("#title").css({
-
-				position: "absolute",
-				top: ($(window).height()-$("#title img").height())/2,
-				left: ($(window).width()-$("#title img").width())/2
-			});
+				$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+			}
 		}
 	}
 	else {

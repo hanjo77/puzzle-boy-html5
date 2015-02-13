@@ -9,7 +9,17 @@ body {
 	background-position: static;
 	margin: 0;
 	padding: 0;
+	width: 100%;
+	height: 100%;
+	display: table;
 	font-family: Verdana, Helvetica, sans-serif;
+}
+
+#title {
+	
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
 }
 
 canvas {
@@ -26,6 +36,7 @@ canvas {
 	width: 20em;
 	margin: auto;
 	transform: translateY(-50%);
+	display: table-caption;
 }
 
 .contentWrapper img {
@@ -169,6 +180,28 @@ td {
 	clear: both;
 }
 
+.selectionWrapper {
+	
+	width: 100%;
+	height: 100%;
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.selection {
+	
+	box-shadow: 0 0 32px 32px #222;
+	color: #fff;
+	background-color: #222;
+	margin: 32px;
+	width: 640px;
+	display: block;
+	margin: auto auto;
+	clear: both;
+	text-align: center;
+}
+
 #editor #controls div {
 	
 	display: inline;
@@ -178,3 +211,86 @@ td {
 
 	margin: 5px;
 }
+
+.selection ul, .selection li {
+	
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	height: auto;
+	overflow: hidden;
+}
+
+.selection li {
+	
+	margin: 4px;
+}
+
+.selection li a {
+	
+	background-color: #fff;
+	padding: 16px;
+	margin: 0;
+	width: 100%;
+	text-decoration: none;
+	font-weight: bold;
+	color: #000;
+	display: block;
+}
+
+.selection li .canvasContainer {
+	
+	margin: 0;
+	padding: 0;
+	background-color: #fff;
+	width: 96px;
+	height: 96px;
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.backLink{
+	
+	padding: 16px;
+	margin: 8px 4px;
+	text-decoration: none;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+	clear: both;
+	background-color: #fff;
+	color: #000;
+	display: block;
+}
+
+.selection li canvas {
+	
+	width: 96px;
+	max-height: 92px;
+	margin: 0;
+	padding: 0;
+}
+
+#levelSelection {
+	
+	margin: 0;
+}
+
+#levelSelection li {
+	
+	float: left;
+	margin: 0;
+	padding: 0;
+	width: 128px;
+	text-align: center;
+}
+
+#levelSelection li a {
+	
+	margin: 4px;
+	width: 96px;
+	padding: 12px;
+	display: block;
+}
+

@@ -15,10 +15,13 @@ if (isset($_POST["data"])) {
 	}
 	echo $level->save_level($_POST["data"], 1, 0, $id);
 }
-else {
+else if (isset($_GET["id"])) {
 	
-	$id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
-	echo $level->load_level($id);
+	echo $level->load_level((int)$_GET["id"]);
+}
+else if (isset($_GET["origin"]) && isset($_GET["difficulty"])) {
+	
+	echo $level->get_levels($_GET["origin"], $_GET["difficulty"]);
 }
 
 ?>
