@@ -2111,7 +2111,7 @@ function resize() {
 				$("#help .content").css({
 
 					'marginTop': Math.floor(($("#help").height()-$("#help .content").height())/2),
-					'marginLeft': Math.floor(($("#help").width()-$("#help .content").width())/2)
+					'marginLeft': Math.floor(($("#help").width()-$("#help .content").width())/2)-(tileSize/2)
 				});
 			}
 		}
