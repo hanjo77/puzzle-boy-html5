@@ -299,3 +299,50 @@ td {
 	display: block;
 }
 
+#btnHelp {
+
+	position: absolute;
+	cursor: pointer;
+}
+
+#help {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	top: 0;
+	left: 0;
+}
+
+#help .content {
+
+	/* background-color: #6180b3;
+    opacity: 1; */
+    position: absolute;
+    padding: 0 1.2em;
+    width: 480px;
+	border: 2px solid #000;
+    box-sizing: border-box;
+}
+
+#help h1 {
+
+	margin: .5em 0 .3em;
+    text-align: center;
+}
+
+#help th, #help td {
+
+    padding: .5em 1em;
+    vertical-align: middle;
+}
+
+#help th {
+
+	width: 70px;
+    text-align: right;
+}
+
+#help td {
+
+	width: 100%;
+}

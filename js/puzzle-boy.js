@@ -1,7 +1,7 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, tmpBlock, rotators, currentId,
 levelArray, players, player, goalPos, undoSteps, gameLoop, dragStartPos, 
 backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime,
-mousePressed, draggable;
+mousePressed, draggable, isPaused;
 
 var jumpSpeed = 8;
 
@@ -67,6 +67,8 @@ function rotationIndexByKey(key) {
 }
 
 var tileSize = 32;
+
+var maxDimensions = 20;
 
 var spriteMap = {};
 
@@ -573,7 +575,7 @@ function drawLevel(level, loadOnly) {
 
 	if (!loadOnly) {
 		
-		$("body").html('<canvas id="playground"></canvas>');
+		$("body").html('<canvas id="playground"></canvas><img id="btnHelp" src="img/btn-help.png"/>');
 		canvas = $("#playground").get(0);
 		canvas.width = fieldSize[0];
 		canvas.height = fieldSize[1];
@@ -581,6 +583,10 @@ function drawLevel(level, loadOnly) {
 
 		updateCollisionMaps();
 		resize();
+		$("#btnHelp").click(function() {
+
+			openHelp();
+		});
 
 		backgroundCanvas = drawBackground();
 		drawPlayground();
@@ -603,7 +609,7 @@ function startEditor() {
 	levelArray = [];
 	undoSteps = [];
 	playerIndexes = [];
-	fieldSize = [20, 20];
+	fieldSize = [maxDimensions, maxDimensions];
 	for (var row = 0; row < fieldSize[1]; row++) {
 	
 		var levelRow = [];
@@ -631,6 +637,32 @@ function startEditor() {
 
 	drawEditorMenu();
 	setTimeout(drawEditor, 1000);
+}
+
+function openHelp() {
+
+	if (!isPaused) {
+
+		isPaused = true;
+		$.ajax({
+		  url: "help.php",
+		  context: document.body
+		}).done(function(data) {
+		
+			$("body").append(data);
+			resize();
+			$(window).click(function() {
+
+				closeHelp();
+			});
+		});
+	}
+}
+
+function closeHelp() {
+
+	$("#help").remove();
+	isPaused = false;
 }
 
 function drawEditorMenu() {
@@ -1771,6 +1803,10 @@ function endLevel() {
 		}).done(function(data) {
 		
 			$("body").html(data);
+			$(".btnRetry").click(function() {
+
+				loadLevel(levelNr);
+			});
 		});
 	}
 }
@@ -2039,6 +2075,17 @@ function resize() {
 				});
 		
 				$("body").css('background-position', offset[0] + "px " + offset[1] + "px");
+				$("#btnHelp").css({
+					'top': offset[1],
+					'left': offset[0] });
+				if ($("#help").length > 0) {
+
+					$("#help .content").css({
+
+						'top': Math.floor(($(window).height()-$("#help .content").height())/2),
+						'left': Math.floor(($(window).width()-$("#help .content").width())/2)
+					});
+				}
 			}
 		}
 	}
@@ -2286,7 +2333,7 @@ function hasParent($child, parentId) {
 
 $(document).keydown(function(e) {
 
-	if($("#editor").length <= 0) {
+	if($("#editor").length <= 0 && !isPaused) {
 		
 		e.preventDefault();
 		if (player && !player.direction && !enteredGoal && !isJumping &&
@@ -2320,7 +2367,7 @@ $(document).keydown(function(e) {
 
 $(document).keyup(function(e) {
 
-	if($("#editor").length <= 0) {
+	if($("#editor").length <= 0 && !isPaused) {
 		
 		e.preventDefault();
 		if (player && player.pos && !player.direction && !enteredGoal && !isJumping &&
@@ -2339,8 +2386,16 @@ $(document).keyup(function(e) {
 			case 27: // escape
 				window.location.reload();
 				break;
+
+			case 72: // h
+				openHelp();
+				break;
 			}
 		}
+	}
+	else if (isPaused && e.keyCode == 72) {
+
+		closeHelp();
 	}
 });
 
