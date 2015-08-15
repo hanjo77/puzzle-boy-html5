@@ -587,7 +587,7 @@ function drawLevel(level, loadOnly) {
 
 			openHelp();
 		});
-		$("#btnHelp").touchstart(function() {
+		$("#btnHelp")[0].addEventListener('touchstart', function(e) {
 
 			openHelp(true);
 		});
