@@ -664,6 +664,10 @@ function openHelp(isTouch) {
 
 				closeHelp();
 			});
+			$("ªhelp")[0].addEventListener('touchstart', function(e) {
+
+				closeHelp();
+			});
 		});
 	}
 }
