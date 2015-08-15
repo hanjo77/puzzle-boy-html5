@@ -1,7 +1,7 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, tmpBlock, rotators, currentId,
 levelArray, players, player, goalPos, undoSteps, gameLoop, dragStartPos, 
 backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime,
-mousePressed, draggable, isPaused, isTouch;
+mousePressed, draggable, isPaused;
 
 var jumpSpeed = 8;
 
@@ -587,6 +587,10 @@ function drawLevel(level, loadOnly) {
 
 			openHelp();
 		});
+		$("#btnHelp").touchstart(function() {
+
+			openHelp(true);
+		});
 
 		backgroundCanvas = drawBackground();
 		drawPlayground();
@@ -639,7 +643,7 @@ function startEditor() {
 	setTimeout(drawEditor, 1000);
 }
 
-function openHelp() {
+function openHelp(isTouch) {
 
 	var url = "help.php";
 	if (isTouch) {
@@ -2107,7 +2111,6 @@ function resize() {
 
 document.addEventListener('touchstart', function(e) {
 	
-	isTouch = true;
 	if (player && !player.direction && !enteredGoal && !isJumping &&
 		levelArray[player.pos[1]][player.pos[0]] != "2") {
 			
