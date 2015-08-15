@@ -1,10 +1,10 @@
 html, body {
-	
+
 	height: 100%;
 }
 
 body {
-	
+
 	background-image: url(../sprites/brick.png);
 	background-position: static;
 	margin: 0;
@@ -16,21 +16,21 @@ body {
 }
 
 #title {
-	
+
 	display: table-cell;
 	vertical-align: middle;
 	text-align: center;
 }
 
 canvas {
-	
+
 	background-color: #6180b3;
 	margin: 0;
 	padding: 0;
 }
 
 .contentWrapper {
-	
+
 	position: relative;
 	top: 50%;
 	width: 20em;
@@ -40,13 +40,13 @@ canvas {
 }
 
 .contentWrapper img {
-	
+
 	position: absolute;
 	z-index: 1;
 }
 
 .content {
-	
+
 	box-shadow: 0 0 36px 36px #000;
 	color: #fff;
 	background-color: #000;
@@ -56,34 +56,34 @@ canvas {
 }
 
 table {
-	
+
 	width: 100%;
 	padding-bottom: 2em;
 }
 
 .buttons {
-	
+
 	padding-bottom: 1em;
 }
 
 th, td {
-	
+
 	width: 50%;
 	padding: 0 .1em;
 }
 
 th {
-	
+
 	text-align: right;
 }
 
 td {
-	
+
 	text-align: left;
 }
 
 .potato {
-	
+
 	right: -6em;
 	top: -3em;
 }
@@ -95,19 +95,19 @@ td {
 }
 
 .carrot {
-	
+
 	bottom: -10.5em;
 	left: 2em;
 }
 
 .pepper {
-	
+
 	top: -5.5em;
 	left: 4em;
 }
 
 .buttons a {
-	
+
 	background-color: #fff;
 	padding: .5em 1em;
 	margin: 0;
@@ -117,13 +117,13 @@ td {
 }
 
 #editor {
-	
+
 	width: 990px;
 	height: 704px;
 }
 
 #editor #playground {
-	
+
 	box-shadow: 0 0 32px 32px #222;
 	color: #fff;
 	background-color: #222;
@@ -142,18 +142,18 @@ td {
 }
 
 #editor #nav {
-	
+
 	float: left;
 }
 
 #editor #options {
-	
+
 	font-size: 1.5em;
 	color: #fff;
 }
 
 #editor #options input, #editor #options button {
-	
+
 	font-size: 0.8em;
 	color: #fff;
 	clear: both;
@@ -164,12 +164,12 @@ td {
 }
 
 #editor #options input {
-	
+
 	width: 93%;
 }
 
 #editor #controls, #editor #options {
-	
+
 	box-shadow: 0 0 32px 32px #222;
 	color: #fff;
 	background-color: #222;
@@ -181,7 +181,7 @@ td {
 }
 
 .selectionWrapper {
-	
+
 	width: 100%;
 	height: 100%;
 	display: table-cell;
@@ -190,7 +190,7 @@ td {
 }
 
 .selection {
-	
+
 	box-shadow: 0 0 32px 32px #222;
 	color: #fff;
 	background-color: #222;
@@ -203,7 +203,7 @@ td {
 }
 
 #editor #controls div {
-	
+
 	display: inline;
 }
 
@@ -213,7 +213,7 @@ td {
 }
 
 .selection ul, .selection li {
-	
+
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -222,12 +222,12 @@ td {
 }
 
 .selection li {
-	
+
 	margin: 4px;
 }
 
 .selection li a {
-	
+
 	background-color: #fff;
 	padding: 16px;
 	margin: 0;
@@ -239,7 +239,7 @@ td {
 }
 
 .selection li .canvasContainer {
-	
+
 	margin: 0;
 	padding: 0;
 	background-color: #fff;
@@ -251,7 +251,7 @@ td {
 }
 
 .backLink{
-	
+
 	padding: 16px;
 	margin: 8px 4px;
 	text-decoration: none;
@@ -265,7 +265,7 @@ td {
 }
 
 .selection li canvas {
-	
+
 	width: 96px;
 	max-height: 92px;
 	margin: 0;
@@ -273,17 +273,17 @@ td {
 }
 
 #gameSelection li {
-	
+
 	height: 160px;
 }
 
 #levelSelection {
-	
+
 	margin: 0;
 }
 
 #levelSelection li {
-	
+
 	float: left;
 	margin: 0;
 	padding: 0;
@@ -292,7 +292,7 @@ td {
 }
 
 #levelSelection li a {
-	
+
 	margin: 4px;
 	width: 96px;
 	padding: 12px;
@@ -308,19 +308,20 @@ td {
 #help {
 	width: 100%;
 	height: 100%;
-	position: relative;
+	position: static;
 	top: 0;
 	left: 0;
+	display: none;
 }
 
 #help .content {
 
 	/* background-color: #6180b3;
     opacity: 1; */
-    position: absolute;
+    position: relative;
     padding: 0 1.2em;
     width: 480px;
-	border: 2px solid #000;
+		border: 2px solid #000;
     box-sizing: border-box;
 }
 

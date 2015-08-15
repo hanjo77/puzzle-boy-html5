@@ -659,15 +659,21 @@ function openHelp(isTouch) {
 		}).done(function(data) {
 		
 			$("body").append(data);
-			resize();
 			$(window).click(function() {
 
 				closeHelp();
 			});
-			$("ªhelp")[0].addEventListener('touchstart', function(e) {
+			$("#help")[0].addEventListener('touchstart', function(e) {
 
 				closeHelp();
 			});
+			window.setTimeout(function() {
+				
+				$("#help").css({
+					"display": "block"
+				});
+				resize();
+			}, 500);
 		});
 	}
 }
@@ -2093,12 +2099,16 @@ function resize() {
 					'left': offset[0] });
 				if ($("#help").length > 0) {
 
-					$("#help .content").css({
-
-						'top': Math.floor(($(window).height()-$("#help .content").height())/2),
-						'left': Math.floor(($(window).width()-$("#help .content").width())/2)
-					});
+					$("#help").css({
+						
+						"height": $(window).height()
+					})
 				}
+				$("#help .content").css({
+
+					'marginTop': Math.floor(($("#help").height()-$("#help .content").height())/2),
+					'marginLeft': Math.floor(($("#help").width()-$("#help .content").width())/2)
+				});
 			}
 		}
 	}

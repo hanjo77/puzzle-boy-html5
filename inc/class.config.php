@@ -17,7 +17,7 @@ class SenkuShaConfig {
         "server" => "127.0.0.1",
         "name" => "puzzle-boy",
         "user" => "root",
-        "password" => ""
+        "password" => "sheriff"
     );
 
     // Email server connection settings
