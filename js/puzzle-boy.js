@@ -1,7 +1,7 @@
 var canvas, context, bgSprite, sprites, levelMap, blocks, tmpBlock, rotators, currentId,
 levelArray, players, player, goalPos, undoSteps, gameLoop, dragStartPos, 
 backgroundCanvas, isGoingBack, enteredGoal, playerCount, firstTouch, isJumping, jumpAcceleration, startTime,
-mousePressed, draggable, isPaused;
+mousePressed, draggable, isPaused, isTouch;
 
 var jumpSpeed = 8;
 
@@ -641,11 +641,16 @@ function startEditor() {
 
 function openHelp() {
 
+	var url = "help.php";
+	if (isTouch) {
+
+		url = "help-mobile.php";
+	}
 	if (!isPaused) {
 
 		isPaused = true;
 		$.ajax({
-		  url: "help.php",
+		  url: url,
 		  context: document.body
 		}).done(function(data) {
 		
@@ -2102,6 +2107,7 @@ function resize() {
 
 document.addEventListener('touchstart', function(e) {
 	
+	isTouch = true;
 	if (player && !player.direction && !enteredGoal && !isJumping &&
 		levelArray[player.pos[1]][player.pos[0]] != "2") {
 			
