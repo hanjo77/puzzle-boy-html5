@@ -659,7 +659,7 @@ function openHelp(isTouch) {
 		}).done(function(data) {
 		
 			$("body").append(data);
-			$(window).click(function() {
+			$("#help").click(function() {
 
 				closeHelp();
 			});
@@ -675,6 +675,10 @@ function openHelp(isTouch) {
 				resize();
 			}, 500);
 		});
+	}
+	else {
+
+		closeHelp();
 	}
 }
 
