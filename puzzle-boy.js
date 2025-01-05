@@ -853,13 +853,13 @@ const drawDifficultySelection = (originId) => {
     backLink.innerText = 'Back';
 
 	const maxLevel = sessionStorage.getItem('maxLevel_' + (originId - 1));
+	const maxDifficulty = parseInt(maxLevel, 10) / 10;
 
     for (let i = 0; i < difficulties.length; i++) {
 
         const listEntry = document.createElement('li');
 
         const gameLink = document.createElement('a');
-		const maxDifficulty = Math.floor(maxLevel / 10) % 3;
 		if (i <= maxDifficulty) {
 			gameLink.href = '#difficulty' + originId + '|' + difficulties[i].id;
 		}
