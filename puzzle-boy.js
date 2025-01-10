@@ -23,6 +23,8 @@ let topBlockChar = String.fromCharCode(128);
 
 let fieldSize = [0, 0];
 
+let enterKeyListener;
+
 const rotations = [
 	{
 		'key': 'up',
@@ -988,13 +990,14 @@ const drawPlaygroundCanvas = () => {
 }
 
 const loadLevel = (levelId) => {
-	
+	enterKeyListener = false;
 	levelNr = levelId;
     level = getLevelById(levelId);
-    setTimeout(function() {
-        
-        drawLevel(level.data);
-    }, 1000);
+	if (level) {
+		setTimeout(drawLevel(level.data), 1000);
+	} else {
+		setTimeout(loadLevel(levelId), 1000);
+	}
 }
 
 const drawBackground = () => {
@@ -1106,6 +1109,9 @@ const getBlockCanvas = (block) => {
 
 const drawPlayground = () => {
 	
+	if (gameLoop) {
+		cancelAnimationFrame(gameLoop);
+	}
 	gameLoop = requestAnimationFrame(drawPlayground);
 	context.clearRect(0, 0, fieldSize[0], fieldSize[1]);
 	// draw background
@@ -1834,7 +1840,7 @@ const endLevel = () => {
         contentWrapper.appendChild(contentNode);
 
         const contentTitle = document.createElement('h1');
-        contentTitle.innerText = 'Well done!';
+        contentTitle.innerText = 'You solved level ' + levelNr + '!';
 
         contentNode.appendChild(contentTitle);
 
@@ -1866,9 +1872,9 @@ const endLevel = () => {
         buttonContainer.className = 'buttons';
 
 		const maxLevel = sessionStorage.getItem('maxLevel_' + (levelNr > 30 ? 1 : 0));
+		const nextLevel = levelNr + 1;
 
 		if (maxLevel <= levelNr) {
-			const nextLevel = levelNr + 1;
 			sessionStorage.setItem('maxLevel_' + (levelNr > 30 ? 1 : 0), nextLevel);
 			setCookie(
 				"progress",
@@ -1891,7 +1897,10 @@ const endLevel = () => {
         const continueButton = document.createElement('a');
         continueButton.className = 'btnContinue';
         continueButton.innerText = 'Continue';
-        continueButton.href = '#level' + (levelNr + 1);
+        continueButton.href = '#level' + (nextLevel);
+		continueButton.addEventListener('click', loadLevel(nextLevel));
+
+		enterKeyListener = true;
 
         buttonContainer.appendChild(retryButton);
         buttonContainer.appendChild(continueButton);
@@ -2085,8 +2094,7 @@ const goBack = () => {
 const checkHash = () => {
 	levelNr = parseInt(window.location.hash.replace('#level', ''), 10);
 	const maxLevel = sessionStorage.getItem('maxLevel_' + [levelNr > 30 ? 1 : 0]);
-	if (window.location.hash.indexOf('#level') > -1 && !isNaN(levelNr) && levelNr <= maxLevel) {		
-        document.body.innerHTML = '';
+	if (window.location.hash.indexOf('#level') > -1 && !isNaN(levelNr) && levelNr <= maxLevel) {
 		loadLevel(levelNr);
 	}
 	else if (window.location.hash.indexOf('#games') > -1) {
@@ -2331,7 +2339,7 @@ document.addEventListener('keyup', (e) => {
 				break;
 
 			case 'Escape':
-				window.location.reload();
+				loadLevel(levelNr);
 				break;
 
 			case 'h':
@@ -2343,6 +2351,13 @@ document.addEventListener('keyup', (e) => {
 	else if (isPaused && e.keyCode == 72) {
 
 		closeHelp();
+	}
+});
+
+window.addEventListener('keydown', (event) => {
+	if (event.key === 'Enter' && enterKeyListener) {
+		window.location.hash = 'level' + levelNr;
+		loadLevel(levelNr);
 	}
 });
 
